@@ -65,6 +65,9 @@
         .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .faq-item.active .faq-content { max-height: 200px; padding-top: 1rem; }
         .faq-item.active i { transform: rotate(180deg); }
+
+        /* Payment Overlay Animation */
+        #paymentOverlay { transition: opacity 0.5s ease, visibility 0.5s ease; }
     </style>
 </head>
 <body class="cyber-grid">
@@ -127,13 +130,23 @@
         
         <div class="grid lg:grid-cols-2 gap-8 items-stretch">
             <!-- Step 1: Payment & Code Verification -->
-            <div class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border hover:border-blue-500/50 transition">
+            <div class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border hover:border-blue-500/50 transition relative overflow-hidden">
+                
+                <!-- Adjustment 2: The Lock Overlay -->
+                <div id="paymentOverlay" class="absolute inset-0 z-10 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
+                    <i class="fas fa-user-lock text-5xl mb-4 text-blue-500"></i>
+                    <h4 class="font-bold text-2xl mb-2">Step Locked</h4>
+                    <p class="text-sm text-gray-400 mb-6 max-w-[250px]">You must log in to your dashboard to view the payment QR and unlock credits.</p>
+                    <button onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition">LOGIN TO UNLOCK</button>
+                </div>
+
                 <div>
                     <span class="step-number text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">STEP 01</span>
                     <h3 class="text-3xl font-bold mb-4">Get Credits</h3>
                     <p class="text-gray-400 mb-6">Scan RM 5 via DuitNow. Your 6-digit <b>Verification Code</b> will be sent to your email automatically.</p>
                     
                     <div class="bg-white p-3 rounded-2xl inline-block mb-6 shadow-2xl shadow-blue-500/20">
+                        <!-- Fixed Direct Link from ImgBB -->
                         <img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png&data=YourDuitNowID" alt="QR" class="w-44 h-44">
                     </div>
                 </div>
@@ -263,8 +276,14 @@
         // --- 1. Login & Session Management ---
         window.onload = function() {
             const savedUser = localStorage.getItem('currentUserName');
-            if (savedUser) updateUIForLoggedInUser(savedUser);
-            if(localStorage.getItem('isUnlocked') === 'true') unlockScanner();
+            if (savedUser) {
+                updateUIForLoggedInUser(savedUser);
+                removePaymentLock(); // Keep it unlocked if they were already logged in
+            }
+            
+            if(localStorage.getItem('isUnlocked') === 'true') {
+                unlockScanner();
+            }
         }
 
         function toggleLogin() {
@@ -278,7 +297,7 @@
             const inputID = document.getElementById('loginID').value.trim();
             const inputPW = document.getElementById('loginPW').value.trim();
 
-            btn.innerText = "WAKING UP SERVER...";
+            btn.innerText = "AUTHENTICATING...";
             btn.disabled = true;
 
             try {
@@ -287,17 +306,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: inputID, pw: inputPW })
                 });
+
                 const result = await response.json();
+
                 if (response.ok) {
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('currentUserName', result.name);
                     updateUIForLoggedInUser(result.name);
+                    removePaymentLock(); // Adjustment: Hide the lock overlay on success
                     toggleLogin();
                     alert("Welcome, " + result.name);
                 } else {
-                    alert(result.message);
+                    // Adjustment 1: Simply show wrong login info
+                    alert("Invalid Account ID or Password. Please try again.");
                 }
             } catch (error) {
+                // Only show server boot message if the fetch fails completely (network error)
                 alert("Server is booting up. Please try again in 30 seconds!");
             } finally {
                 btn.innerText = originalText;
@@ -313,14 +337,29 @@
             }
         }
 
+        // Adjustment: Helper function to hide the overlay
+        function removePaymentLock() {
+            const overlay = document.getElementById('paymentOverlay');
+            if(overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.visibility = 'hidden', 500);
+            }
+        }
+
         function handleCodeVerification() {
+            // Safety check: ensure user is logged in before validating payment
+            if (!localStorage.getItem('isLoggedIn')) {
+                alert("Please log in first.");
+                return;
+            }
+
             const code = document.getElementById('verifyCodeInput').value.trim();
             if(code.length === 6) {
                 alert("Success! Payment verified. Scanner is now active.");
                 localStorage.setItem('isUnlocked', 'true');
                 unlockScanner();
             } else {
-                alert("Invalid Code.");
+                alert("Invalid Code. Please check your email for the RM 5 receipt.");
             }
         }
 
