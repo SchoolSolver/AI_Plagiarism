@@ -283,60 +283,91 @@
         &copy; 2026 SchoolSolver. Not affiliated with Turnitin LLC or OpenAI.
     </footer>
 
+   
     <script>
-        // Modal Logic
-        function toggleLogin() {
-            const modal = document.getElementById('loginModal');
-            modal.classList.toggle('modal-active');
+    // --- 1. Login Logic ---
+    
+    // Check if user is already logged in when page refreshes
+    window.onload = function() {
+        const savedUser = localStorage.getItem('userEmail');
+        if (savedUser) {
+            updateNavToUser(savedUser);
         }
+    }
 
-        // Particle Logic
-        const particleCount = 20;
-        const colors = ['#3b82f6', '#10b981'];
+    function toggleLogin() {
+        const modal = document.getElementById('loginModal');
+        modal.classList.toggle('modal-active');
+    }
+
+    // This runs when they click "SIGN IN"
+    document.querySelector('#loginModal form').onsubmit = function(e) {
+        e.preventDefault();
+        const email = e.target.querySelector('input[type="email"]').value;
         
-        for (let i = 0; i < particleCount; i++) {
-            createParticle();
+        // Save to browser memory
+        localStorage.setItem('userEmail', email);
+        
+        // Update UI
+        updateNavToUser(email);
+        toggleLogin();
+        
+        console.log("User logged in: " + email);
+    };
+
+    function updateNavToUser(email) {
+        const btn = document.querySelector('button[onclick="toggleLogin()"]');
+        // Extract the name part of the email (e.g., harissh0909)
+        const name = email.split('@')[0].toUpperCase();
+        btn.innerHTML = `<i class="fas fa-user-circle mr-2"></i> ${name}`;
+        btn.classList.replace('bg-blue-600', 'bg-green-600');
+    }
+
+    // Logout Helper (Optional: Run this in console to reset)
+    function logout() {
+        localStorage.removeItem('userEmail');
+        location.reload();
+    }
+
+    // --- 2. Particle Logic (Keep this exactly as it was) ---
+    const particleCount = 20;
+    const colors = ['#3b82f6', '#10b981'];
+    
+    for (let i = 0; i < particleCount; i++) {
+        createParticle();
+    }
+
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const size = Math.random() * 4 + 2 + 'px';
+        particle.style.width = size;
+        particle.style.height = size;
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        particle.style.left = startX + 'px';
+        particle.style.top = startY + 'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.opacity = Math.random() * 0.5;
+        document.body.appendChild(particle);
+        animateParticle(particle);
+    }
+
+    function animateParticle(p) {
+        let x = parseFloat(p.style.left);
+        let y = parseFloat(p.style.top);
+        let dx = (Math.random() - 0.5) * 0.5;
+        let dy = (Math.random() - 0.5) * 0.5;
+        function move() {
+            x += dx; y += dy;
+            if (x < 0 || x > window.innerWidth) dx *= -1;
+            if (y < 0 || y > window.innerHeight) dy *= -1;
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            requestAnimationFrame(move);
         }
-
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            const size = Math.random() * 4 + 2 + 'px';
-            particle.style.width = size;
-            particle.style.height = size;
-            
-            const startX = Math.random() * window.innerWidth;
-            const startY = Math.random() * window.innerHeight;
-            
-            particle.style.left = startX + 'px';
-            particle.style.top = startY + 'px';
-            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.opacity = Math.random() * 0.5;
-
-            document.body.appendChild(particle);
-            animateParticle(particle);
-        }
-
-        function animateParticle(p) {
-            let x = parseFloat(p.style.left);
-            let y = parseFloat(p.style.top);
-            let dx = (Math.random() - 0.5) * 0.5;
-            let dy = (Math.random() - 0.5) * 0.5;
-
-            function move() {
-                x += dx;
-                y += dy;
-
-                if (x < 0 || x > window.innerWidth) dx *= -1;
-                if (y < 0 || y > window.innerHeight) dy *= -1;
-
-                p.style.left = x + 'px';
-                p.style.top = y + 'px';
-                requestAnimationFrame(move);
-            }
-            move();
-        }
-    </script>
+        move();
+    }
+</script>
 </body>
 </html>
