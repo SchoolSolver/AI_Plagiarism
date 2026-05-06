@@ -47,13 +47,19 @@
         .modal-content-scale { transform: scale(0.9); transition: transform 0.3s ease; }
         .modal-active .modal-content-scale { transform: scale(1); }
 
-        /* Moving Background Particles */
         .particle {
             position: fixed;
             background: rgba(59, 130, 246, 0.3);
             border-radius: 50%;
             pointer-events: none;
             z-index: -1;
+        }
+
+        .btn-disabled {
+            background: #262626 !important;
+            color: #525252 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
         }
     </style>
 </head>
@@ -69,14 +75,14 @@
                 <h3 class="text-3xl font-bold mb-2">Login</h3>
                 <p class="text-sm text-gray-400">Access your secure dashboard</p>
             </div>
-            <form class="space-y-4">
+            <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Email</label>
-                    <input type="email" placeholder="student@university.edu" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
+                    <input type="email" id="loginEmail" required placeholder="student@university.edu" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Password</label>
-                    <input type="password" placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
+                    <input type="password" required placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold mt-4 shadow-lg shadow-blue-600/20 transition">
                     SIGN IN
@@ -96,65 +102,64 @@
                 <a href="#" class="hover:text-blue-400 transition">Home</a>
                 <a href="#how-it-works" class="hover:text-blue-400 transition">How it Works</a>
                 <a href="#pricing" class="hover:text-blue-400 transition">Pricing</a>
-                <a href="#faq" class="hover:text-blue-400 transition">FAQ</a>
             </div>
-            <!-- Toggle Login on Click -->
-            <button onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition">
+            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition">
                 DASHBOARD
             </button>
         </div>
     </nav>
 
-    <!-- Hero / Upload Section -->
+    <!-- Hero / Main Section -->
     <header class="max-w-7xl mx-auto px-6 pt-20 pb-24">
         <div class="text-center mb-16">
             <h1 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight">
                 SUBMIT WITH <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">CONFIDENCE.</span>
             </h1>
             <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-                The ultimate "Pre-Check" for students. Get into the <b>Green Zone</b> before your professor even opens your file.
+                Verify your work instantly. Get into the <b>Green Zone</b> before your final submission.
             </p>
         </div>
         
         <div class="grid lg:grid-cols-2 gap-8 items-stretch">
-            <!-- Payment Box -->
+            <!-- Step 1: Payment & Code Verification -->
             <div class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border hover:border-blue-500/50 transition">
                 <div>
                     <span class="step-number text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">STEP 01</span>
                     <h3 class="text-3xl font-bold mb-4">Get Credits</h3>
-                    <p class="text-gray-400 mb-6">Scan the DuitNow QR to secure your <b>High-Priority Scan</b>.</p>
+                    <p class="text-gray-400 mb-6">Scan RM 5 via DuitNow. Your 6-digit <b>Verification Code</b> will be sent to your email automatically.</p>
                     
                     <div class="bg-white p-3 rounded-2xl inline-block mb-6 shadow-2xl shadow-blue-500/20">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=YourDuitNowID" alt="QR" class="w-44 h-44">
                     </div>
                 </div>
                 
-                <form action="#" class="space-y-4">
-                    <div class="relative">
-                        <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Upload Receipt</label>
-                        <input type="file" class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600/10 file:text-blue-400 hover:file:bg-blue-600/20 cursor-pointer border border-white/5 rounded-xl"/>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Verification Code</label>
+                        <input type="text" id="verifyCodeInput" placeholder="EX: 123456" 
+                               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition">
                     </div>
-                    <button class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">VERIFY & ADD CREDIT</button>
-                </form>
+                    <button onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">
+                        VALIDATE & UNLOCK
+                    </button>
+                </div>
             </div>
 
-            <!-- Scanner Box -->
-            <div class="glass p-8 rounded-3xl green-zone-glow flex flex-col justify-between">
+            <!-- Step 2: Scanner (Locked by default) -->
+            <div id="scannerBox" class="glass p-8 rounded-3xl flex flex-col justify-between transition-all duration-500">
                 <div>
-                    <span class="bg-green-600 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Step 02: Scanner</span>
+                    <span id="step2Label" class="bg-gray-600 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Step 02: Locked</span>
                     <h3 class="text-3xl font-bold mb-4">Run the Check</h3>
-                    <p class="text-gray-400 mb-6">Your file is processed through Turnitin's repository without being stored.</p>
+                    <p class="text-gray-400 mb-6">Once unlocked, upload your file for AI and Similarity analysis.</p>
                 </div>
 
                 <div class="space-y-4">
-                    <input type="email" placeholder="Student Email Address" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 focus:border-green-500 outline-none transition">
-                    
-                    <div class="border-2 border-dashed border-white/10 rounded-2xl p-12 text-center hover:border-green-500/50 transition cursor-pointer group">
-                        <i class="fas fa-file-shield text-5xl mb-4 text-gray-600 group-hover:text-green-500 transition"></i>
-                        <p class="text-sm font-medium">Drag essay here or <span class="text-green-500">browse files</span></p>
+                    <div class="border-2 border-dashed border-white/10 rounded-2xl p-12 text-center transition">
+                        <i id="scannerIcon" class="fas fa-lock text-5xl mb-4 text-gray-600"></i>
+                        <p id="scannerText" class="text-sm font-medium text-gray-500">Validate code in Step 01 to unlock</p>
                     </div>
 
-                    <button class="w-full bg-gradient-to-r from-green-600 to-green-400 py-5 rounded-xl font-black text-black tracking-tighter text-lg hover:scale-[1.02] transition shadow-lg shadow-green-500/20">
+                    <button id="analysisBtn" disabled class="btn-disabled w-full py-5 rounded-xl font-black tracking-tighter text-lg transition shadow-lg">
                         START ANALYSIS
                     </button>
                 </div>
@@ -162,212 +167,103 @@
         </div>
     </header>
 
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-        <h2 class="text-4xl font-bold text-center mb-16">The Stealth Process</h2>
-        <div class="grid md:grid-cols-3 gap-12">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-500 text-2xl">
-                    <i class="fas fa-fingerprint"></i>
-                </div>
-                <h4 class="text-xl font-bold mb-3">AI Pattern Scan</h4>
-                <p class="text-gray-400 text-sm">We analyze linguistic fingerprints to detect ChatGPT, Claude, and Gemini signatures.</p>
-            </div>
-            <div class="text-center">
-                <div class="w-16 h-16 bg-purple-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-purple-500 text-2xl">
-                    <i class="fas fa-database"></i>
-                </div>
-                <h4 class="text-xl font-bold mb-3">Turnitin Sync</h4>
-                <p class="text-gray-400 text-sm">Your paper is cross-referenced against billions of academic journals and web pages.</p>
-            </div>
-            <div class="text-center">
-                <div class="w-16 h-16 bg-green-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-green-500 text-2xl">
-                    <i class="fas fa-file-circle-check"></i>
-                </div>
-                <h4 class="text-xl font-bold mb-3">No-Repository Pass</h4>
-                <p class="text-gray-400 text-sm">Critical: We check your paper without saving it to the database. It stays "fresh" for submission.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="max-w-7xl mx-auto px-6 py-24">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4">Choose Your Shield</h2>
-            <p class="text-gray-400">Professional-grade integrity for every budget.</p>
-        </div>
-        <div class="grid md:grid-cols-3 gap-8">
-            <!-- Basic -->
-            <div class="glass p-8 rounded-3xl border border-white/5">
-                <h4 class="font-bold mb-2">Single Pass</h4>
-                <div class="text-4xl font-black mb-6">RM 5<span class="text-sm font-normal text-gray-500">/scan</span></div>
-                <ul class="space-y-3 text-sm text-gray-400 mb-8">
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> Full Similarity Report</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> AI Detection Score</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> Standard Queue</li>
-                </ul>
-                <button class="w-full border border-white/20 py-3 rounded-xl hover:bg-white hover:text-black transition font-bold">Select</button>
-            </div>
-            <!-- Popular -->
-            <div class="glass p-8 rounded-3xl border-2 border-blue-500 relative transform scale-105">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
-                <h4 class="font-bold mb-2">Academic Bundle</h4>
-                <div class="text-4xl font-black mb-6">RM 20<span class="text-sm font-normal text-gray-500">/5 scans</span></div>
-                <ul class="space-y-3 text-sm text-gray-400 mb-8">
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> 5 Full Similarity Reports</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> 5 AI Detection Scores</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> High Priority Queue</li>
-                </ul>
-                <button class="w-full bg-blue-600 py-3 rounded-xl hover:bg-blue-500 transition font-bold">Buy Now</button>
-            </div>
-            <!-- Pro -->
-            <div class="glass p-8 rounded-3xl border border-white/5">
-                <h4 class="font-bold mb-2">Unlimited Pro</h4>
-                <div class="text-4xl font-black mb-6">RM 50<span class="text-sm font-normal text-gray-500">/mo</span></div>
-                <ul class="space-y-3 text-sm text-gray-400 mb-8">
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> Unlimited Reports</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> Instant Processing</li>
-                    <li><i class="fas fa-check text-blue-500 mr-2"></i> 24/7 Priority Support</li>
-                </ul>
-                <button class="w-full border border-white/20 py-3 rounded-xl hover:bg-white hover:text-black transition font-bold">Select</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section id="faq" class="max-w-3xl mx-auto px-6 py-24">
-        <h2 class="text-3xl font-bold text-center mb-12">Common Questions</h2>
-        <div class="space-y-6">
-            <div class="glass p-6 rounded-2xl">
-                <h4 class="font-bold mb-2">Will my paper be stored in Turnitin?</h4>
-                <p class="text-sm text-gray-400">No. We use a "No-Repository" setting. Your paper will not be saved to Turnitin's database, so it won't show 100% similarity when you finally submit to your school.</p>
-            </div>
-            <div class="glass p-6 rounded-2xl">
-                <h4 class="font-bold mb-2">How long does a scan take?</h4>
-                <p class="text-sm text-gray-400">Most reports are generated within 3 to 10 minutes depending on the current server queue.</p>
-            </div>
-            <div class="glass p-6 rounded-2xl">
-                <h4 class="font-bold mb-2">Is the AI detection accurate?</h4>
-                <p class="text-sm text-gray-400">Our model is 99% accurate against major AI writers. However, any score below 15% should be reviewed for potential false positives.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Status Area -->
-    <section class="max-w-4xl mx-auto px-6 pb-20">
-        <div class="glass p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-4">
-                <div class="relative flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                </div>
-                <div>
-                    <p class="font-bold">System Status: Active</p>
-                    <p class="text-xs text-gray-400">Uptime: 99.9% | Network: Secure</p>
-                </div>
-            </div>
-            <div class="text-center md:text-right">
-                <p class="text-sm text-gray-400 uppercase tracking-tighter">Secured Today</p>
-                <p class="text-2xl font-black text-blue-500">1,248 FILES</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="text-center py-12 border-t border-white/5 text-gray-500 text-xs">
-        <div class="mb-4 space-x-6">
-            <a href="#" class="hover:text-white">Privacy Policy</a>
-            <a href="#" class="hover:text-white">Terms of Service</a>
-            <a href="#" class="hover:text-white">Contact Support</a>
-        </div>
-        &copy; 2026 SchoolSolver. Not affiliated with Turnitin LLC or OpenAI.
+        &copy; 2026 SchoolSolver. Not affiliated with Turnitin LLC.
     </footer>
 
-   
     <script>
-    // --- 1. Login Logic ---
-    
-    // Check if user is already logged in when page refreshes
-    window.onload = function() {
-        const savedUser = localStorage.getItem('userEmail');
-        if (savedUser) {
-            updateNavToUser(savedUser);
+        // --- 1. Login & Session Management ---
+        window.onload = function() {
+            const savedUser = localStorage.getItem('userEmail');
+            if (savedUser) updateUIForLoggedInUser(savedUser);
+            
+            // Check if they previously verified a code
+            if(localStorage.getItem('isUnlocked') === 'true') {
+                unlockScanner();
+            }
         }
-    }
 
-    function toggleLogin() {
-        const modal = document.getElementById('loginModal');
-        modal.classList.toggle('modal-active');
-    }
-
-    // This runs when they click "SIGN IN"
-    document.querySelector('#loginModal form').onsubmit = function(e) {
-        e.preventDefault();
-        const email = e.target.querySelector('input[type="email"]').value;
-        
-        // Save to browser memory
-        localStorage.setItem('userEmail', email);
-        
-        // Update UI
-        updateNavToUser(email);
-        toggleLogin();
-        
-        console.log("User logged in: " + email);
-    };
-
-    function updateNavToUser(email) {
-        const btn = document.querySelector('button[onclick="toggleLogin()"]');
-        // Extract the name part of the email (e.g., harissh0909)
-        const name = email.split('@')[0].toUpperCase();
-        btn.innerHTML = `<i class="fas fa-user-circle mr-2"></i> ${name}`;
-        btn.classList.replace('bg-blue-600', 'bg-green-600');
-    }
-
-    // Logout Helper (Optional: Run this in console to reset)
-    function logout() {
-        localStorage.removeItem('userEmail');
-        location.reload();
-    }
-
-    // --- 2. Particle Logic (Keep this exactly as it was) ---
-    const particleCount = 20;
-    const colors = ['#3b82f6', '#10b981'];
-    
-    for (let i = 0; i < particleCount; i++) {
-        createParticle();
-    }
-
-    function createParticle() {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = Math.random() * 4 + 2 + 'px';
-        particle.style.width = size;
-        particle.style.height = size;
-        const startX = Math.random() * window.innerWidth;
-        const startY = Math.random() * window.innerHeight;
-        particle.style.left = startX + 'px';
-        particle.style.top = startY + 'px';
-        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        particle.style.opacity = Math.random() * 0.5;
-        document.body.appendChild(particle);
-        animateParticle(particle);
-    }
-
-    function animateParticle(p) {
-        let x = parseFloat(p.style.left);
-        let y = parseFloat(p.style.top);
-        let dx = (Math.random() - 0.5) * 0.5;
-        let dy = (Math.random() - 0.5) * 0.5;
-        function move() {
-            x += dx; y += dy;
-            if (x < 0 || x > window.innerWidth) dx *= -1;
-            if (y < 0 || y > window.innerHeight) dy *= -1;
-            p.style.left = x + 'px';
-            p.style.top = y + 'px';
-            requestAnimationFrame(move);
+        function toggleLogin() {
+            document.getElementById('loginModal').classList.toggle('modal-active');
         }
-        move();
-    }
-</script>
+
+        document.getElementById('loginForm').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            localStorage.setItem('userEmail', email);
+            updateUIForLoggedInUser(email);
+            toggleLogin();
+        };
+
+        function updateUIForLoggedInUser(email) {
+            const btn = document.getElementById('navLoginBtn');
+            const name = email.split('@')[0].toUpperCase();
+            btn.innerHTML = `<i class="fas fa-user-circle mr-2"></i> ${name}`;
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+        }
+
+        // --- 2. Verification Code Logic ---
+        function handleCodeVerification() {
+            const code = document.getElementById('verifyCodeInput').value.trim();
+            
+            // Your Gmail API script should be generating 6-digit codes.
+            // This checks if the code is 6 digits for the demo.
+            if(code.length === 6) {
+                alert("Success! Payment verified. Scanner is now active.");
+                localStorage.setItem('isUnlocked', 'true');
+                unlockScanner();
+            } else {
+                alert("Invalid Code. Please check your email for the RM 5 receipt confirmation.");
+            }
+        }
+
+        function unlockScanner() {
+            const scannerBox = document.getElementById('scannerBox');
+            const step2Label = document.getElementById('step2Label');
+            const scannerIcon = document.getElementById('scannerIcon');
+            const scannerText = document.getElementById('scannerText');
+            const analysisBtn = document.getElementById('analysisBtn');
+
+            // Visual Unlock
+            scannerBox.classList.add('green-zone-glow');
+            step2Label.classList.replace('bg-gray-600', 'bg-green-600');
+            step2Label.innerText = "Step 02: Active";
+            
+            scannerIcon.classList.replace('fa-lock', 'fa-file-shield');
+            scannerIcon.classList.replace('text-gray-600', 'text-green-500');
+            
+            scannerText.innerHTML = 'Drag essay here or <span class="text-green-500">browse files</span>';
+            scannerText.classList.replace('text-gray-500', 'text-white');
+
+            analysisBtn.disabled = false;
+            analysisBtn.classList.remove('btn-disabled');
+            analysisBtn.classList.add('bg-gradient-to-r', 'from-green-600', 'to-green-400', 'text-black', 'hover:scale-[1.02]');
+        }
+
+        // --- 3. Particles (Visuals) ---
+        const particleCount = 15;
+        for (let i = 0; i < particleCount; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.width = p.style.height = Math.random() * 5 + 2 + 'px';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = Math.random() * 100 + 'vh';
+            p.style.backgroundColor = ['#3b82f6', '#39FF14'][Math.floor(Math.random() * 2)];
+            document.body.appendChild(p);
+            animate(p);
+        }
+
+        function animate(p) {
+            let x = parseFloat(p.style.left), y = parseFloat(p.style.top);
+            let dx = (Math.random() - 0.5) * 0.4, dy = (Math.random() - 0.5) * 0.4;
+            function m() {
+                x += dx; y += dy;
+                if (x < 0 || x > 100) dx *= -1; if (y < 0 || y > 100) dy *= -1;
+                p.style.left = x + 'vw'; p.style.top = y + 'vh';
+                requestAnimationFrame(m);
+            }
+            m();
+        }
+    </script>
 </body>
 </html>
