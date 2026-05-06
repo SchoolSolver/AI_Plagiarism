@@ -42,7 +42,7 @@
         }
 
         /* Modal Logic */
-        #loginModal { transition: all 0.3s ease; }
+        #loginModal { transition: all 0.3s ease; visibility: hidden; opacity: 0; }
         .modal-active { visibility: visible !important; opacity: 1 !important; }
         .modal-content-scale { transform: scale(0.9); transition: transform 0.3s ease; }
         .modal-active .modal-content-scale { transform: scale(1); }
@@ -66,26 +66,26 @@
 <body class="cyber-grid">
 
     <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 z-[100] flex items-center justify-center invisible opacity-0 bg-black/80 backdrop-blur-sm px-4">
+    <div id="loginModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
         <div class="modal-content-scale glass w-full max-w-md p-8 rounded-3xl border border-blue-500/30 relative">
             <button onclick="toggleLogin()" class="absolute top-6 right-6 text-gray-500 hover:text-white transition">
                 <i class="fas fa-times text-xl"></i>
             </button>
             <div class="text-center mb-8">
                 <h3 class="text-3xl font-bold mb-2">Login</h3>
-                <p class="text-sm text-gray-400">Access your secure dashboard</p>
+                <p class="text-sm text-gray-400">Enter your provided Account ID</p>
             </div>
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Email</label>
-                    <input type="email" id="loginEmail" required placeholder="student@university.edu" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Account ID</label>
+                    <input type="text" id="loginID" required placeholder="SS-101" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Password</label>
-                    <input type="password" required placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Security Password</label>
+                    <input type="password" id="loginPW" required placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold mt-4 shadow-lg shadow-blue-600/20 transition">
-                    SIGN IN
+                    AUTHENTICATE
                 </button>
             </form>
         </div>
@@ -172,12 +172,13 @@
     </footer>
 
     <script>
-        // --- 1. Login & Session Management ---
+        // --- 1. Login & Session Management (Local Server Integration) ---
         window.onload = function() {
-            const savedUser = localStorage.getItem('userEmail');
-            if (savedUser) updateUIForLoggedInUser(savedUser);
+            const savedUser = localStorage.getItem('currentUserName');
+            if (savedUser) {
+                updateUIForLoggedInUser(savedUser);
+            }
             
-            // Check if they previously verified a code
             if(localStorage.getItem('isUnlocked') === 'true') {
                 unlockScanner();
             }
@@ -187,27 +188,52 @@
             document.getElementById('loginModal').classList.toggle('modal-active');
         }
 
-        document.getElementById('loginForm').onsubmit = function(e) {
+        document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            localStorage.setItem('userEmail', email);
-            updateUIForLoggedInUser(email);
-            toggleLogin();
+            
+            const inputID = document.getElementById('loginID').value.trim();
+            const inputPW = document.getElementById('loginPW').value.trim();
+
+            console.log("Attempting login for ID:", inputID);
+
+            try {
+                // Connecting to your Python app.py
+                const response = await fetch('http://127.0.0.1:5000/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: inputID, pw: inputPW })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    console.log("Login Success:", result.name);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('currentUserName', result.name);
+                    
+                    updateUIForLoggedInUser(result.name);
+                    toggleLogin();
+                    alert("Welcome, " + result.name);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error("Connection Error:", error);
+                alert("Cannot connect to Authentication Server. Ensure app.py is running!");
+            }
         };
 
-        function updateUIForLoggedInUser(email) {
+        function updateUIForLoggedInUser(name) {
             const btn = document.getElementById('navLoginBtn');
-            const name = email.split('@')[0].toUpperCase();
-            btn.innerHTML = `<i class="fas fa-user-circle mr-2"></i> ${name}`;
-            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            if(btn) {
+                btn.innerHTML = `<i class="fas fa-user-circle mr-2"></i> ${name.toUpperCase()}`;
+                btn.classList.replace('bg-blue-600', 'bg-green-600');
+            }
         }
 
         // --- 2. Verification Code Logic ---
         function handleCodeVerification() {
             const code = document.getElementById('verifyCodeInput').value.trim();
-            
-            // Your Gmail API script should be generating 6-digit codes.
-            // This checks if the code is 6 digits for the demo.
             if(code.length === 6) {
                 alert("Success! Payment verified. Scanner is now active.");
                 localStorage.setItem('isUnlocked', 'true');
@@ -224,7 +250,6 @@
             const scannerText = document.getElementById('scannerText');
             const analysisBtn = document.getElementById('analysisBtn');
 
-            // Visual Unlock
             scannerBox.classList.add('green-zone-glow');
             step2Label.classList.replace('bg-gray-600', 'bg-green-600');
             step2Label.innerText = "Step 02: Active";
