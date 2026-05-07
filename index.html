@@ -61,10 +61,6 @@
             opacity: 0.6;
         }
 
-        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .faq-item.active .faq-content { max-height: 200px; padding-top: 1rem; }
-        .faq-item.active i { transform: rotate(180deg); }
-
         #paymentOverlay { transition: opacity 0.5s ease, visibility 0.5s ease; }
     </style>
 </head>
@@ -105,7 +101,6 @@
                 <a href="#home" class="hover:text-blue-400 transition">Home</a>
                 <a href="#how-it-works" class="hover:text-blue-400 transition">How it Works</a>
                 <a href="#pricing" class="hover:text-blue-400 transition">Pricing</a>
-                <a href="#faq" class="hover:text-blue-400 transition">FAQ</a>
             </div>
             <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition">
                 DASHBOARD
@@ -147,7 +142,7 @@
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Verification Code</label>
                         <input type="text" id="verifyCodeInput" placeholder="EX: 123456" 
-                               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition">
+                               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition uppercase">
                     </div>
                     <button onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">
                         VALIDATE & UNLOCK
@@ -217,7 +212,6 @@
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('authBtn');
-            const originalText = btn.innerText;
             const inputID = document.getElementById('loginID').value.trim();
             const inputPW = document.getElementById('loginPW').value.trim();
 
@@ -239,14 +233,14 @@
                     updateUIForLoggedInUser(result.name);
                     removePaymentLock();
                     toggleLogin();
-                    alert("Welcome, " + result.name);
+                    alert("Welcome back, " + result.name);
                 } else {
                     alert(result.message || "Invalid Credentials.");
                 }
             } catch (error) {
                 alert("Server Connection Failed. Please try again later.");
             } finally {
-                btn.innerText = originalText;
+                btn.innerText = "AUTHENTICATE";
                 btn.disabled = false;
             }
         };
@@ -287,14 +281,14 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    alert("Payment Verified! Scanner Unlocked.");
+                    alert("Success! Scanner Unlocked.");
                     localStorage.setItem('isUnlocked', 'true');
                     unlockScanner();
                 } else {
-                    alert(result.message || "Invalid or already used code.");
+                    alert(result.message || "Invalid or used code.");
                 }
             } catch (error) {
-                alert("Connection error. Ensure your server is active.");
+                alert("Connection error. Check your Render server logs.");
             }
         }
 
@@ -310,19 +304,19 @@
             step2Label.innerText = "Step 02: Active";
             scannerIcon.classList.replace('fa-lock', 'fa-file-shield');
             scannerIcon.classList.replace('text-gray-600', 'text-green-500');
-            scannerText.innerHTML = 'Drag essay here or <span class="text-green-500">browse files</span>';
+            scannerText.innerHTML = 'System Ready <i class="fas fa-check-circle ml-2 text-green-400"></i>';
             scannerText.classList.replace('text-gray-500', 'text-white');
             analysisBtn.disabled = false;
             analysisBtn.classList.remove('btn-disabled');
-            analysisBtn.classList.add('bg-gradient-to-r', 'from-green-600', 'to-green-400', 'text-black', 'hover:scale-[1.02]');
+            analysisBtn.classList.add('bg-gradient-to-r', 'from-green-600', 'to-green-400', 'text-black', 'hover:scale-[1.01]');
         }
 
-        // Particle Background Logic
-        const particleCount = 15;
+        // Background Particles
+        const particleCount = 12;
         for (let i = 0; i < particleCount; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
-            p.style.width = p.style.height = Math.random() * 5 + 2 + 'px';
+            p.style.width = p.style.height = Math.random() * 4 + 2 + 'px';
             p.style.left = Math.random() * 100 + 'vw';
             p.style.top = Math.random() * 100 + 'vh';
             p.style.backgroundColor = ['#3b82f6', '#39FF14'][Math.floor(Math.random() * 2)];
@@ -332,7 +326,7 @@
 
         function animateParticle(p) {
             let x = parseFloat(p.style.left), y = parseFloat(p.style.top);
-            let dx = (Math.random() - 0.5) * 0.4, dy = (Math.random() - 0.5) * 0.4;
+            let dx = (Math.random() - 0.5) * 0.3, dy = (Math.random() - 0.5) * 0.3;
             function move() {
                 x += dx; y += dy;
                 if (x < 0 || x > 100) dx *= -1; if (y < 0 || y > 100) dy *= -1;
@@ -340,10 +334,6 @@
                 requestAnimationFrame(move);
             }
             move();
-        }
-
-        function toggleFaq(element) {
-            element.classList.toggle('active');
         }
     </script>
 </body>
