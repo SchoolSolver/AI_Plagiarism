@@ -8,108 +8,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&display=swap');
-        
-        :root {
-            --neon-green: #39FF14;
-            --cyber-blue: #3b82f6;
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #050505; 
-            color: white;
-            scroll-behavior: smooth;
-            overflow-x: hidden;
-        }
-
+        :root { --neon-green: #39FF14; --cyber-blue: #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: white; scroll-behavior: smooth; overflow-x: hidden; }
         h1, h2, h3, .nav-logo { font-family: 'Space Grotesk', sans-serif; }
-
         .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        
-        .green-zone-glow { 
-            box-shadow: 0 0 30px rgba(57, 255, 20, 0.15);
-            border: 1px solid rgba(57, 255, 20, 0.4);
-        }
-
-        .cyber-grid {
-            background-image: linear-gradient(to right, #121212 1px, transparent 1px),
-                              linear-gradient(to bottom, #121212 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .step-number {
-            background: linear-gradient(135deg, var(--cyber-blue), #a855f7);
-        }
-
-        /* Modal Fixes */
-        #loginModal { 
-            transition: all 0.3s ease; 
-            display: none; /* Changed from visibility for better control */
-            opacity: 0; 
-        }
-        #loginModal.modal-active { 
-            display: flex !important; 
-            opacity: 1 !important; 
-        }
-        .modal-content-scale { transform: scale(0.9); transition: transform 0.3s ease; }
-        .modal-active .modal-content-scale { transform: scale(1); }
-
-        .particle {
-            position: fixed;
-            background: rgba(59, 130, 246, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .btn-disabled {
-            background: #262626 !important;
-            color: #525252 !important;
-            cursor: not-allowed !important;
-            opacity: 0.6;
-        }
-
-        .loader {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #3b82f6;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 8px;
-        }
+        .green-zone-glow { box-shadow: 0 0 30px rgba(57, 255, 20, 0.15); border: 1px solid rgba(57, 255, 20, 0.4); }
+        .cyber-grid { background-image: linear-gradient(to right, #121212 1px, transparent 1px), linear-gradient(to bottom, #121212 1px, transparent 1px); background-size: 40px 40px; }
+        #loginModal { transition: all 0.3s ease; display: none; opacity: 0; }
+        #loginModal.modal-active { display: flex !important; opacity: 1 !important; }
+        .btn-disabled { background: #262626 !important; color: #525252 !important; cursor: not-allowed !important; opacity: 0.6; }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3b82f6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+        .particle { position: fixed; background: rgba(59, 130, 246, 0.3); border-radius: 50%; pointer-events: none; z-index: -1; }
     </style>
 </head>
 <body class="cyber-grid">
 
     <div id="loginModal" class="fixed inset-0 z-[100] items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-        <div class="modal-content-scale glass w-full max-w-md p-8 rounded-3xl border border-blue-500/30 relative">
-            <button onclick="toggleLogin()" class="absolute top-6 right-6 text-gray-500 hover:text-white transition">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+        <div class="glass w-full max-w-md p-8 rounded-3xl border border-blue-500/30 relative">
+            <button onclick="toggleLogin()" class="absolute top-6 right-6 text-gray-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
             <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold mb-2">Login</h3>
-                <p class="text-sm text-gray-400">Enter your provided Account ID</p>
+                <h3 class="text-3xl font-bold mb-2 text-white">Dashboard Login</h3>
+                <p class="text-sm text-gray-400">Manage your credits and scan history.</p>
             </div>
             <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Account ID</label>
-                    <input type="text" id="loginID" required placeholder="SS-101" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition text-white">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Security Password</label>
-                    <input type="password" id="loginPW" required placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition text-white">
-                </div>
-                <button type="submit" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold mt-4 shadow-lg shadow-blue-600/20 transition">
-                    AUTHENTICATE
-                </button>
+                <input type="text" id="loginID" required placeholder="Account ID (SS-XXX)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none text-white focus:border-blue-500">
+                <input type="password" id="loginPW" required placeholder="Password" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none text-white focus:border-blue-500">
+                <button type="submit" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition">AUTHENTICATE</button>
             </form>
         </div>
     </div>
@@ -121,149 +46,87 @@
                 <span>SCHOOL<span class="text-blue-500">SOLVER</span></span>
             </div>
             <div class="hidden md:flex gap-8 text-gray-400 font-medium text-sm uppercase tracking-widest">
-                <a href="#home" class="hover:text-blue-400 transition">Home</a>
-                <a href="#how-it-works" class="hover:text-blue-400 transition">Steps</a>
-                <a href="#pricing" class="hover:text-blue-400 transition">Pricing</a>
-                <a href="#faq" class="hover:text-blue-400 transition">FAQ</a>
+                <a href="#home" class="hover:text-blue-400">Home</a>
+                <a href="#pricing" class="hover:text-blue-400">Pricing</a>
+                <a href="#faq" class="hover:text-blue-400">FAQ</a>
             </div>
-            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition">
-                DASHBOARD
-            </button>
+            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition">DASHBOARD</button>
         </div>
     </nav>
 
     <header id="home" class="max-w-7xl mx-auto px-6 pt-20 pb-16">
         <div class="text-center mb-16">
-            <h1 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight">
-                SUBMIT WITH <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">CONFIDENCE.</span>
-            </h1>
-            <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-                Verify your work instantly. Get into the <b>Green Zone</b> before your final submission.
-            </p>
+            <h1 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight">SUBMIT WITH <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">CONFIDENCE.</span></h1>
+            <p class="text-gray-400 text-lg max-w-xl mx-auto">Instant AI detection and similarity check. Get into the Green Zone.</p>
         </div>
         
         <div class="grid lg:grid-cols-2 gap-8 items-stretch mb-24">
-            <div class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border hover:border-blue-500/40 transition relative overflow-hidden">
+            <div class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border relative overflow-hidden">
                 <div id="paymentOverlay" class="absolute inset-0 z-10 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
                     <i class="fas fa-user-lock text-5xl mb-4 text-blue-500"></i>
-                    <h4 class="font-bold text-2xl mb-2">Access Restricted</h4>
-                    <p class="text-sm text-gray-400 mb-6 max-w-[280px]">Please log in to your account to view payment details and unlock the scanner.</p>
-                    <button onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold shadow-lg shadow-blue-600/20 transition">LOGIN TO START</button>
+                    <h4 class="font-bold text-2xl mb-2">Login Required</h4>
+                    <button onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition">LOGIN TO PAY</button>
                 </div>
 
                 <div>
-                    <span class="step-number text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Step 01: Payment</span>
-                    <h3 class="text-3xl font-bold mb-4">Unlock Credits</h3>
-                    <p class="text-gray-400 mb-6 text-sm">Scan RM 5 via DuitNow. Once paid, click the button below. Our system will auto-verify your code via Gmail.</p>
-                    
-                    <div class="bg-white p-3 rounded-2xl inline-block mb-6 shadow-2xl shadow-blue-500/20">
-                        <img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-44 h-44 object-contain">
-                    </div>
+                    <span class="bg-blue-600/20 text-blue-400 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase border border-blue-500/30">Step 01: Top Up</span>
+                    <h3 class="text-3xl font-bold mb-4">Add Credits</h3>
+                    <div class="bg-white p-3 rounded-2xl inline-block mb-6"><img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-40 h-40 object-contain"></div>
                 </div>
                 
                 <div class="space-y-4">
-                    <button id="iHavePaidBtn" onclick="startPaymentDetection()" class="w-full border border-blue-500/50 hover:bg-blue-500/10 py-3 rounded-xl transition text-sm font-bold text-blue-400">
-                        I HAVE SCANNED & PAID
-                    </button>
-
-                    <div class="relative">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase block mb-2 tracking-widest">Auto-Generated Code</label>
-                        <input type="text" id="verifyCodeInput" placeholder="---" readonly
-                               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition uppercase text-white">
-                    </div>
-                    <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">
-                        VALIDATE & UNLOCK SCANNER
-                    </button>
+                    <button id="iHavePaidBtn" onclick="startPaymentDetection()" class="w-full border border-blue-500/50 py-3 rounded-xl transition text-sm font-bold text-blue-400">I HAVE PAID RM 5</button>
+                    <input type="text" id="verifyCodeInput" placeholder="---" readonly class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-center tracking-[0.5em] font-bold text-white uppercase">
+                    <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-sm">CLAIM 1 SCAN CREDIT</button>
                 </div>
             </div>
 
-            <div id="scannerBox" class="glass p-8 rounded-3xl flex flex-col justify-between transition-all duration-500 border border-white/5">
+            <div id="scannerBox" class="glass p-8 rounded-3xl flex flex-col justify-between transition-all duration-500 border border-white/5 relative">
+                <div class="absolute top-6 right-6 bg-blue-600/20 border border-blue-500/50 px-4 py-2 rounded-2xl flex items-center gap-2">
+                    <i class="fas fa-coins text-yellow-400"></i>
+                    <span id="creditCount" class="font-bold text-blue-400 tracking-tight">0 CREDITS</span>
+                </div>
+
                 <div>
                     <span id="step2Label" class="bg-gray-700 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Step 02: Locked</span>
                     <h3 class="text-3xl font-bold mb-4">Run the Check</h3>
-                    <p class="text-gray-400 mb-6 text-sm">Upload your file to receive a full Similarity and AI-Generated content report.</p>
                 </div>
+
                 <div class="space-y-4">
-                    <div class="border-2 border-dashed border-white/10 rounded-2xl p-14 text-center transition hover:border-blue-500/30">
-                        <i id="scannerIcon" class="fas fa-lock text-5xl mb-4 text-gray-700"></i>
-                        <p id="scannerText" class="text-sm font-medium text-gray-500 uppercase tracking-widest">Awaiting Verification</p>
+                    <div onclick="triggerFileUpload()" class="border-2 border-dashed border-white/10 rounded-2xl p-14 text-center hover:border-blue-500/30 cursor-pointer group">
+                        <i id="scannerIcon" class="fas fa-lock text-5xl mb-4 text-gray-700 group-hover:text-blue-500"></i>
+                        <p id="scannerText" class="text-sm font-medium text-gray-500 uppercase">Awaiting Credits</p>
+                        <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this)">
                     </div>
-                    <button id="analysisBtn" disabled class="btn-disabled w-full py-5 rounded-xl font-black tracking-widest text-lg transition">
-                        START ANALYSIS
-                    </button>
+                    <p id="fileNameDisplay" class="text-center text-xs text-blue-400 font-mono hidden"></p>
+                    <button id="analysisBtn" disabled onclick="useCreditAndUpload()" class="btn-disabled w-full py-5 rounded-xl font-black text-lg transition">USE 1 CREDIT & UPLOAD</button>
                 </div>
             </div>
         </div>
 
-        <section id="how-it-works" class="py-20 border-t border-white/5">
-            <h2 class="text-4xl font-bold text-center mb-16">The Submission Process</h2>
-            <div class="grid md:grid-cols-3 gap-12">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-600/20 border border-blue-500/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-500 text-2xl">
-                        <i class="fas fa-qrcode"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-3">1. Scan & Pay</h4>
-                    <p class="text-gray-400 text-sm">Use any e-wallet to scan the QR. We use automated bank-to-cloud verification via Gmail.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-purple-600/20 border border-purple-500/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-purple-500 text-2xl">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-3">2. Auto-Detect</h4>
-                    <p class="text-gray-400 text-sm">Our AI monitors payment emails. Once detected, your specific account is updated with a unique code.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-green-600/20 border border-green-500/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-green-500 text-2xl">
-                        <i class="fas fa-check-double"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-3">3. Final Report</h4>
-                    <p class="text-gray-400 text-sm">Upload your document. Get an instant report showing similarity % and AI confidence scores.</p>
-                </div>
-            </div>
-        </section>
-
         <section id="pricing" class="py-20 border-t border-white/5">
-            <h2 class="text-4xl font-bold text-center mb-4">Simple Pricing</h2>
-            <p class="text-gray-400 text-center mb-16">No subscriptions. Pay only when you need a check.</p>
-            <div class="max-w-md mx-auto glass p-1 rounded-3xl border border-blue-500/30">
-                <div class="bg-black/40 rounded-3xl p-8 text-center">
-                    <span class="bg-blue-600 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Standard Scan</span>
-                    <div class="my-8">
-                        <span class="text-5xl font-black">RM 5</span>
-                        <span class="text-gray-500">/ scan</span>
-                    </div>
-                    <ul class="text-left space-y-4 mb-8 text-sm text-gray-300">
-                        <li><i class="fas fa-check text-green-500 mr-3"></i> AI Content Detection</li>
-                        <li><i class="fas fa-check text-green-500 mr-3"></i> Similarity Analysis</li>
-                        <li><i class="fas fa-check text-green-500 mr-3"></i> Detailed PDF Report</li>
-                        <li><i class="fas fa-check text-green-500 mr-3"></i> 24/7 Support</li>
-                    </ul>
-                    <button onclick="document.getElementById('home').scrollIntoView()" class="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-gray-200 transition">GET STARTED</button>
-                </div>
+            <h2 class="text-4xl font-bold text-center mb-16">Simple Pricing</h2>
+            <div class="max-w-md mx-auto glass p-8 rounded-3xl text-center border-blue-500/30 border">
+                <span class="text-5xl font-black">RM 5</span><span class="text-gray-500"> / scan</span>
+                <ul class="text-left space-y-4 my-8 text-sm text-gray-300">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i> AI Content Detection</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i> Similarity Analysis</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i> Private Report</li>
+                </ul>
             </div>
         </section>
 
         <section id="faq" class="py-20 border-t border-white/5">
             <h2 class="text-4xl font-bold text-center mb-16">FAQ</h2>
-            <div class="max-w-3xl mx-auto space-y-4">
-                <div class="glass p-6 rounded-2xl">
-                    <h4 class="font-bold mb-2">How long does verification take?</h4>
-                    <p class="text-gray-400 text-sm">Usually between 10-60 seconds. Our system checks for the bank confirmation email automatically.</p>
-                </div>
-                <div class="glass p-6 rounded-2xl">
-                    <h4 class="font-bold mb-2">Is my file kept private?</h4>
-                    <p class="text-gray-400 text-sm">Yes. Files are encrypted during scanning and deleted automatically after the report is generated.</p>
-                </div>
-                <div class="glass p-6 rounded-2xl">
-                    <h4 class="font-bold mb-2">What if my payment isn't detected?</h4>
-                    <p class="text-gray-400 text-sm">Ensure you paid exactly RM 5. If the code doesn't appear after 2 minutes, contact support with your receipt.</p>
-                </div>
+            <div class="max-w-2xl mx-auto space-y-4">
+                <div class="glass p-6 rounded-2xl"><h4 class="font-bold mb-2">How long is verification?</h4><p class="text-gray-400 text-sm">Usually 10-60 seconds after payment.</p></div>
+                <div class="glass p-6 rounded-2xl"><h4 class="font-bold mb-2">Are my files safe?</h4><p class="text-gray-400 text-sm">Yes, files are deleted immediately after the report is generated.</p></div>
             </div>
         </section>
     </header>
 
-    <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-xs">
-        <p>&copy; 2026 SCHOOLSOLVER. All Rights Reserved. Protected by AES-256 Encryption.</p>
+    <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-xs uppercase tracking-widest">
+        &copy; 2026 SCHOOLSOLVER. PROTECTED BY AES-256 ENCRYPTION.
     </footer>
 
     <script>
@@ -271,23 +134,14 @@
         let pollingInterval = null;
 
         window.onload = function() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            const savedUser = localStorage.getItem('currentUserName');
-
-            if (isLoggedIn && savedUser) {
-                updateUIForLoggedInUser(savedUser);
-                removePaymentLock(); 
-            } else {
-                localStorage.clear();
-                applyPaymentLock(); 
-            }
-            
-            if(localStorage.getItem('isUnlocked') === 'true') {
-                unlockScanner();
-            }
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                updateUIForLoggedInUser(localStorage.getItem('currentUserName'));
+                removePaymentLock();
+                refreshCredits();
+            } else { applyPaymentLock(); }
+            spawnParticles();
         }
 
-        // TOGGLE LOGIN FIX
         function toggleLogin() {
             const modal = document.getElementById('loginModal');
             if (modal.classList.contains('modal-active')) {
@@ -295,206 +149,163 @@
                 setTimeout(() => { modal.style.display = 'none'; }, 300);
             } else {
                 modal.style.display = 'flex';
-                // Small timeout to allow display:flex to register before adding opacity transition
                 setTimeout(() => { modal.classList.add('modal-active'); }, 10);
             }
         }
 
-        function applyPaymentLock() {
-            const overlay = document.getElementById('paymentOverlay');
-            if(overlay) {
-                overlay.style.display = 'flex';
-                overlay.style.opacity = '1';
-                overlay.style.visibility = 'visible';
-            }
+        async function refreshCredits() {
+            const userId = localStorage.getItem('currentUserName');
+            if (!userId) return;
+            try {
+                const res = await fetch(`${API_BASE}/get-credits?user_id=${userId}`);
+                const data = await res.json();
+                document.getElementById('creditCount').innerText = `${data.credits} CREDITS`;
+                if (data.credits > 0) unlockScannerUI();
+                else lockScannerUI();
+            } catch (e) { console.error("Credit sync failed"); }
         }
 
-        function removePaymentLock() {
-            const overlay = document.getElementById('paymentOverlay');
-            if(overlay) {
-                overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.visibility = 'hidden';
-                    overlay.style.display = 'none';
-                }, 500);
-            }
-        }
+        function applyPaymentLock() { document.getElementById('paymentOverlay').style.display = 'flex'; }
+        function removePaymentLock() { document.getElementById('paymentOverlay').style.display = 'none'; }
 
-        // AUTHENTICATION FIX
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('authBtn');
-            const inputID = document.getElementById('loginID').value.trim();
-            const inputPW = document.getElementById('loginPW').value.trim();
-
-            btn.innerText = "AUTHENTICATING...";
-            btn.disabled = true;
-
+            const id = document.getElementById('loginID').value.trim();
+            const pw = document.getElementById('loginPW').value.trim();
+            btn.innerText = "AUTHENTICATING..."; btn.disabled = true;
             try {
-                const response = await fetch(`${API_BASE}/login`, {
+                const res = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: inputID, pw: inputPW })
+                    body: JSON.stringify({ id, pw })
                 });
-
-                const result = await response.json();
-
-                if (response.ok) {
+                const result = await res.json();
+                if (res.ok) {
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('currentUserName', inputID);
-                    updateUIForLoggedInUser(result.name || inputID);
-                    removePaymentLock();
-                    toggleLogin();
-                } else {
-                    alert(result.message || "Invalid Credentials.");
-                }
-            } catch (error) {
-                alert("Server Connection Failed. (Cold start might take 30s)");
-            } finally {
-                btn.innerText = "AUTHENTICATE";
-                btn.disabled = false;
-            }
-        };
-
-        function updateUIForLoggedInUser(name) {
-            const btn = document.getElementById('navLoginBtn');
-            if(btn) {
-                btn.innerHTML = `<i class="fas fa-sign-out-alt mr-2"></i> LOGOUT`;
-                btn.classList.replace('bg-blue-600', 'bg-red-600');
-                btn.onclick = function() {
-                    localStorage.clear();
+                    localStorage.setItem('currentUserName', id);
                     location.reload();
-                };
-            }
-        }
+                } else { alert(result.message); }
+            } catch (e) { alert("Server connection failed."); }
+            finally { btn.innerText = "AUTHENTICATE"; btn.disabled = false; }
+        };
 
         async function startPaymentDetection() {
             const userId = localStorage.getItem('currentUserName');
             const btn = document.getElementById('iHavePaidBtn');
-            const codeInput = document.getElementById('verifyCodeInput');
-
-            if (!userId) return alert("Session expired. Please login again.");
-
             btn.innerHTML = `<span class="loader"></span> AWAITING CONFIRMATION...`;
             btn.disabled = true;
 
-            try {
-                await fetch(`${API_BASE}/notify-intent`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
-                });
+            await fetch(`${API_BASE}/notify-intent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
 
-                if (pollingInterval) clearInterval(pollingInterval);
-                
-                pollingInterval = setInterval(async () => {
-                    const response = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.code && data.code !== "---") {
-                            codeInput.value = data.code;
-                            codeInput.classList.add('border-green-500', 'text-green-400');
-                            btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
-                            btn.classList.replace('text-blue-400', 'text-green-400');
-                            clearInterval(pollingInterval);
-                        }
-                    }
-                }, 5000);
-
-            } catch (e) {
-                alert("Server Error. Please try again.");
-                btn.innerText = "I HAVE SCANNED & PAID";
-                btn.disabled = false;
-            }
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(async () => {
+                const res = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
+                const data = await res.json();
+                if (data.code && data.code !== "---") {
+                    document.getElementById('verifyCodeInput').value = data.code;
+                    btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
+                    clearInterval(pollingInterval);
+                }
+            }, 5000);
         }
 
         async function handleCodeVerification() {
-            const codeValue = document.getElementById('verifyCodeInput').value.trim().toUpperCase();
+            const code = document.getElementById('verifyCodeInput').value;
             const userId = localStorage.getItem('currentUserName');
-            const validateBtn = document.getElementById('validateBtn');
+            if (!code || code === "---") return alert("Awaiting verification code.");
 
-            if (!codeValue || codeValue === "---") return alert("Awaiting verified code...");
-
-            validateBtn.innerText = "VERIFYING...";
-            validateBtn.disabled = true;
-
-            try {
-                const response = await fetch(`${API_BASE}/verify-code`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: codeValue, user_id: userId })
-                });
-
-                const result = await response.json();
-                if (response.ok && result.success) {
-                    localStorage.setItem('isUnlocked', 'true');
-                    unlockScanner();
-                } else {
-                    alert("Invalid verification code.");
-                }
-            } catch (e) {
-                alert("Verification failed.");
-            } finally {
-                validateBtn.innerText = "VALIDATE & UNLOCK SCANNER";
-                validateBtn.disabled = false;
+            const res = await fetch(`${API_BASE}/verify-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, user_id: userId })
+            });
+            if (res.ok) {
+                alert("Credit claimed successfully!");
+                document.getElementById('verifyCodeInput').value = "---";
+                refreshCredits();
             }
         }
 
-        function unlockScanner() {
-            const scannerBox = document.getElementById('scannerBox');
-            const step2Label = document.getElementById('step2Label');
-            const scannerIcon = document.getElementById('scannerIcon');
-            const scannerText = document.getElementById('scannerText');
-            const analysisBtn = document.getElementById('analysisBtn');
-
-            scannerBox.classList.add('green-zone-glow');
-            step2Label.classList.replace('bg-gray-700', 'bg-green-600');
-            step2Label.innerText = "Scanner: Ready";
-            scannerIcon.classList.replace('fa-lock', 'fa-file-shield');
-            scannerIcon.classList.replace('text-gray-700', 'text-green-500');
-            scannerText.innerText = "UPLOAD READY";
-            analysisBtn.disabled = false;
-            analysisBtn.classList.remove('btn-disabled');
-            analysisBtn.classList.add('bg-white', 'text-black', 'hover:bg-green-400');
+        function triggerFileUpload() { 
+            if (parseInt(document.getElementById('creditCount').innerText) > 0) {
+                document.getElementById('fileInput').click(); 
+            } else { alert("Please pay to add credits."); }
         }
 
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
+        function handleFileSelect(input) {
+            if (input.files.length > 0) {
+                document.getElementById('fileNameDisplay').innerText = `Ready: ${input.files[0].name}`;
+                document.getElementById('fileNameDisplay').classList.remove('hidden');
+                document.getElementById('scannerText').innerText = "READY TO SCAN";
+                document.getElementById('analysisBtn').disabled = false;
+                document.getElementById('analysisBtn').classList.remove('btn-disabled');
+                document.getElementById('analysisBtn').classList.add('bg-white', 'text-black');
+            }
+        }
+
+        async function useCreditAndUpload() {
             const userId = localStorage.getItem('currentUserName');
+            const file = document.getElementById('fileInput').files[0];
+            const btn = document.getElementById('analysisBtn');
+            btn.innerText = "UPLOADING..."; btn.disabled = true;
 
             const formData = new FormData();
-            formData.append('document', fileInput.files[0]);
-            formData.append('user_id', userId); // Send the ID for the credit check
+            formData.append('document', file);
+            formData.append('user_id', userId);
 
-            const response = await fetch(`${API_BASE}/analyze`, {
-                method: 'POST',
-                body: formData // No headers needed for FormData
-            });
-
-            const result = await response.json();
-                if (response.status === 403) {
-                alert("Nice try! You need to pay for credits first.");
-                } else {
-        // Show report...
+            const res = await fetch(`${API_BASE}/analyze`, { method: 'POST', body: formData });
+            if (res.ok) {
+                alert("Analysis started! Report will be generated.");
+                refreshCredits();
+            } else {
+                const err = await res.json();
+                alert(err.message);
             }
+            btn.innerText = "USE 1 CREDIT & UPLOAD";
         }
 
-        // Background particles
-        const particleCount = 15;
-        for (let i = 0; i < particleCount; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.width = p.style.height = Math.random() * 3 + 1 + 'px';
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.top = Math.random() * 100 + 'vh';
-            p.style.opacity = Math.random();
-            document.body.appendChild(p);
-            animateParticle(p);
+        function unlockScannerUI() {
+            document.getElementById('scannerBox').classList.add('green-zone-glow');
+            document.getElementById('step2Label').classList.replace('bg-gray-700', 'bg-green-600');
+            document.getElementById('step2Label').innerText = "Scanner: Ready";
+            document.getElementById('scannerIcon').classList.replace('fa-lock', 'fa-unlock');
+            document.getElementById('scannerIcon').classList.replace('text-gray-700', 'text-green-500');
+            document.getElementById('scannerText').innerText = "SELECT DOCUMENT";
+        }
+
+        function lockScannerUI() {
+            document.getElementById('scannerBox').classList.remove('green-zone-glow');
+            document.getElementById('analysisBtn').classList.add('btn-disabled');
+            document.getElementById('analysisBtn').disabled = true;
+        }
+
+        function updateUIForLoggedInUser(id) {
+            const btn = document.getElementById('navLoginBtn');
+            btn.innerHTML = `<i class="fas fa-sign-out-alt mr-2"></i> LOGOUT`;
+            btn.classList.replace('bg-blue-600', 'bg-red-600');
+            btn.onclick = () => { localStorage.clear(); location.reload(); };
+        }
+
+        function spawnParticles() {
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = p.style.height = Math.random() * 3 + 1 + 'px';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                document.body.appendChild(p);
+                animateParticle(p);
+            }
         }
 
         function animateParticle(p) {
             let x = parseFloat(p.style.left), y = parseFloat(p.style.top);
-            let dx = (Math.random() - 0.5) * 0.2, dy = (Math.random() - 0.5) * 0.2;
+            let dx = (Math.random() - 0.5) * 0.1, dy = (Math.random() - 0.5) * 0.1;
             function move() {
                 x += dx; y += dy;
                 if (x < 0 || x > 100) dx *= -1; if (y < 0 || y > 100) dy *= -1;
