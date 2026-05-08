@@ -150,7 +150,7 @@
                     document.getElementById('iHavePaidBtn').classList.remove('btn-disabled');
                     document.getElementById('timerDisplay').classList.remove('hidden');
                     statusText.innerHTML = `System Status: <span class="text-blue-500 font-bold underline">SESSION ACTIVE FOR ${userId}</span>`;
-                    startCountdown(300); // 5 minute lock
+                    startCountdown(60); // 1 minute lock
                 } else {
                     // Busy
                     alert(`SYSTEM BUSY: ${data.message}`);
