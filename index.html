@@ -41,8 +41,16 @@
             background: linear-gradient(135deg, var(--cyber-blue), #a855f7);
         }
 
-        #loginModal { transition: all 0.3s ease; visibility: hidden; opacity: 0; }
-        .modal-active { visibility: visible !important; opacity: 1 !important; }
+        /* Modal Fixes */
+        #loginModal { 
+            transition: all 0.3s ease; 
+            display: none; /* Changed from visibility for better control */
+            opacity: 0; 
+        }
+        #loginModal.modal-active { 
+            display: flex !important; 
+            opacity: 1 !important; 
+        }
         .modal-content-scale { transform: scale(0.9); transition: transform 0.3s ease; }
         .modal-active .modal-content-scale { transform: scale(1); }
 
@@ -81,7 +89,7 @@
 </head>
 <body class="cyber-grid">
 
-    <div id="loginModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+    <div id="loginModal" class="fixed inset-0 z-[100] items-center justify-center bg-black/80 backdrop-blur-sm px-4">
         <div class="modal-content-scale glass w-full max-w-md p-8 rounded-3xl border border-blue-500/30 relative">
             <button onclick="toggleLogin()" class="absolute top-6 right-6 text-gray-500 hover:text-white transition">
                 <i class="fas fa-times text-xl"></i>
@@ -93,11 +101,11 @@
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Account ID</label>
-                    <input type="text" id="loginID" required placeholder="SS-101" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
+                    <input type="text" id="loginID" required placeholder="SS-101" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition text-white">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase ml-1">Security Password</label>
-                    <input type="password" id="loginPW" required placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition">
+                    <input type="password" id="loginPW" required placeholder="••••••••" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-blue-500 outline-none transition text-white">
                 </div>
                 <button type="submit" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold mt-4 shadow-lg shadow-blue-600/20 transition">
                     AUTHENTICATE
@@ -161,7 +169,7 @@
                     <div class="relative">
                         <label class="text-[10px] font-bold text-gray-500 uppercase block mb-2 tracking-widest">Auto-Generated Code</label>
                         <input type="text" id="verifyCodeInput" placeholder="---" readonly
-                               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition uppercase">
+                               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition uppercase text-white">
                     </div>
                     <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">
                         VALIDATE & UNLOCK SCANNER
@@ -279,13 +287,23 @@
             }
         }
 
+        // TOGGLE LOGIN FIX
         function toggleLogin() {
-            document.getElementById('loginModal').classList.toggle('modal-active');
+            const modal = document.getElementById('loginModal');
+            if (modal.classList.contains('modal-active')) {
+                modal.classList.remove('modal-active');
+                setTimeout(() => { modal.style.display = 'none'; }, 300);
+            } else {
+                modal.style.display = 'flex';
+                // Small timeout to allow display:flex to register before adding opacity transition
+                setTimeout(() => { modal.classList.add('modal-active'); }, 10);
+            }
         }
 
         function applyPaymentLock() {
             const overlay = document.getElementById('paymentOverlay');
             if(overlay) {
+                overlay.style.display = 'flex';
                 overlay.style.opacity = '1';
                 overlay.style.visibility = 'visible';
             }
@@ -295,10 +313,14 @@
             const overlay = document.getElementById('paymentOverlay');
             if(overlay) {
                 overlay.style.opacity = '0';
-                setTimeout(() => overlay.style.visibility = 'hidden', 500);
+                setTimeout(() => {
+                    overlay.style.visibility = 'hidden';
+                    overlay.style.display = 'none';
+                }, 500);
             }
         }
 
+        // AUTHENTICATION FIX
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('authBtn');
@@ -320,14 +342,14 @@
                 if (response.ok) {
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('currentUserName', inputID);
-                    updateUIForLoggedInUser(result.name);
+                    updateUIForLoggedInUser(result.name || inputID);
                     removePaymentLock();
                     toggleLogin();
                 } else {
                     alert(result.message || "Invalid Credentials.");
                 }
             } catch (error) {
-                alert("Server Connection Failed.");
+                alert("Server Connection Failed. (Cold start might take 30s)");
             } finally {
                 btn.innerText = "AUTHENTICATE";
                 btn.disabled = false;
@@ -391,9 +413,7 @@
             const userId = localStorage.getItem('currentUserName');
             const validateBtn = document.getElementById('validateBtn');
 
-            if (!codeValue || codeValue === "---") {
-                return alert("Please wait for the payment code to be generated.");
-            }
+            if (!codeValue || codeValue === "---") return alert("Awaiting verified code...");
 
             validateBtn.innerText = "VERIFYING...";
             validateBtn.disabled = true;
@@ -402,23 +422,18 @@
                 const response = await fetch(`${API_BASE}/verify-code`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        code: codeValue,
-                        user_id: userId 
-                    })
+                    body: JSON.stringify({ code: codeValue, user_id: userId })
                 });
 
                 const result = await response.json();
-
                 if (response.ok && result.success) {
                     localStorage.setItem('isUnlocked', 'true');
                     unlockScanner();
-                    alert("Verification successful! Scanner unlocked.");
                 } else {
-                    alert(result.message || "Invalid Code. Please try again.");
+                    alert("Invalid verification code.");
                 }
             } catch (e) {
-                alert("Server connection failed during verification.");
+                alert("Verification failed.");
             } finally {
                 validateBtn.innerText = "VALIDATE & UNLOCK SCANNER";
                 validateBtn.disabled = false;
@@ -438,13 +453,12 @@
             scannerIcon.classList.replace('fa-lock', 'fa-file-shield');
             scannerIcon.classList.replace('text-gray-700', 'text-green-500');
             scannerText.innerText = "UPLOAD READY";
-            scannerText.classList.replace('text-gray-500', 'text-white');
             analysisBtn.disabled = false;
             analysisBtn.classList.remove('btn-disabled');
             analysisBtn.classList.add('bg-white', 'text-black', 'hover:bg-green-400');
         }
 
-        // Particle System
+        // Background particles
         const particleCount = 15;
         for (let i = 0; i < particleCount; i++) {
             const p = document.createElement('div');
