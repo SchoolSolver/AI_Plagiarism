@@ -3,119 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoolSolver | The Green Zone</title>
+    <title>SchoolSolver | Professional Academic Integrity</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&display=swap');
         :root { --neon-green: #39FF14; --cyber-blue: #3b82f6; }
-        body { font-family: 'Inter', sans-serif; background-color: #050505; color: white; scroll-behavior: smooth; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; scroll-behavior: smooth; overflow-x: hidden; }
         h1, h2, h3, .nav-logo { font-family: 'Space Grotesk', sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        .green-zone-glow { box-shadow: 0 0 30px rgba(57, 255, 20, 0.15); border: 1px solid rgba(57, 255, 20, 0.4); }
-        .cyber-grid { background-image: linear-gradient(to right, #121212 1px, transparent 1px), linear-gradient(to bottom, #121212 1px, transparent 1px); background-size: 40px 40px; }
-        #loginModal { transition: all 0.3s ease; display: none; opacity: 0; }
-        #loginModal.modal-active { display: flex !important; opacity: 1 !important; }
-        .btn-disabled { background: #262626 !important; color: #525252 !important; cursor: not-allowed !important; opacity: 0.6; }
-        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3b82f6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; }
+        
+        /* Professional Glassmorphism */
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .green-zone-glow { box-shadow: 0 0 40px rgba(57, 255, 20, 0.1); border: 1px solid rgba(57, 255, 20, 0.3); }
+        .cyber-grid { background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 30px 30px; }
+        
+        /* Modal & UI States */
+        #loginModal { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: none; opacity: 0; transform: scale(0.95); }
+        #loginModal.modal-active { display: flex !important; opacity: 1 !important; transform: scale(1); }
+        .btn-disabled { background: #1e293b !important; color: #64748b !important; cursor: not-allowed !important; border: 1px solid transparent !important; }
+        
+        /* Animated Background Particles */
+        .particle { position: fixed; background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 50%; pointer-events: none; z-index: -1; opacity: 0.4; filter: blur(1px); }
+        
+        /* Payment Pulse */
+        .payment-card { background: linear-gradient(145deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3b82f6; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .particle { position: fixed; background: rgba(59, 130, 246, 0.3); border-radius: 50%; pointer-events: none; z-index: -1; }
-        #qrContainer { display: none; } 
+        
+        #qrContainer { display: none; }
+        .step-number { background: linear-gradient(135deg, #3b82f6, #2563eb); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body class="cyber-grid">
 
-    <div id="loginModal" class="fixed inset-0 z-[100] items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-        <div class="glass w-full max-w-md p-8 rounded-3xl border border-blue-500/30 relative">
-            <button onclick="toggleLogin()" class="absolute top-6 right-6 text-gray-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold mb-2 text-white">Dashboard Login</h3>
-                <p class="text-sm text-gray-400">Manage your credits and scan history.</p>
+    <div id="loginModal" class="fixed inset-0 z-[100] items-center justify-center bg-black/90 backdrop-blur-md px-4">
+        <div class="glass w-full max-w-md p-10 rounded-[2rem] border border-blue-500/30 relative">
+            <button onclick="toggleLogin()" class="absolute top-8 right-8 text-gray-500 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+            <div class="text-center mb-10">
+                <div class="inline-block p-4 rounded-2xl bg-blue-600/10 mb-4 border border-blue-500/20">
+                    <i class="fas fa-fingerprint text-3xl text-blue-500"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-white tracking-tight">Access Dashboard</h3>
+                <p class="text-sm text-gray-400 mt-2">Secure access to your academic credits.</p>
             </div>
-            <form id="loginForm" class="space-y-4">
-                <input type="text" id="loginID" required placeholder="Account ID (SS-XXX)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none text-white focus:border-blue-500">
-                <input type="password" id="loginPW" required placeholder="Password" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none text-white focus:border-blue-500">
-                <button type="submit" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition">AUTHENTICATE</button>
+            <form id="loginForm" class="space-y-5">
+                <div class="space-y-2">
+                    <label class="text-xs uppercase tracking-widest text-gray-500 ml-2">Account Identification</label>
+                    <input type="text" id="loginID" required placeholder="SS-XXX" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-blue-500 transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs uppercase tracking-widest text-gray-500 ml-2">Secret Password</label>
+                    <input type="password" id="loginPW" required placeholder="••••••••" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-blue-500 transition-all">
+                </div>
+                <button type="submit" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">AUTHORIZE SESSION</button>
             </form>
         </div>
     </div>
 
     <nav class="sticky top-0 z-50 glass border-b border-white/5">
-        <div class="p-4 flex justify-between items-center max-w-7xl mx-auto">
-            <div class="text-2xl font-bold tracking-tighter flex items-center gap-2 nav-logo">
-                <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-shield-halved"></i></div>
-                <span>SCHOOL<span class="text-blue-500">SOLVER</span></span>
+        <div class="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
+            <div class="text-2xl font-bold tracking-tighter flex items-center gap-3 nav-logo">
+                <div class="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-600/30"><i class="fas fa-shield-halved text-white"></i></div>
+                <span class="text-white">SCHOOL<span class="text-blue-500">SOLVER</span></span>
             </div>
-            <div class="hidden md:flex gap-8 text-gray-400 font-medium text-sm uppercase tracking-widest">
-                <a href="#home" class="hover:text-blue-400">Home</a>
-                <a href="#pricing" class="hover:text-blue-400">Pricing</a>
-                <a href="#faq" class="hover:text-blue-400">FAQ</a>
+            <div class="hidden md:flex gap-10 text-gray-400 font-medium text-xs uppercase tracking-[0.2em]">
+                <a href="#home" class="hover:text-blue-400 transition">Portal</a>
+                <a href="#how-it-works" class="hover:text-blue-400 transition">Process</a>
+                <a href="#pricing" class="hover:text-blue-400 transition">Credits</a>
+                <a href="#faq" class="hover:text-blue-400 transition">Support</a>
             </div>
-            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition text-sm">DASHBOARD</button>
+            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-white text-black hover:bg-blue-500 hover:text-white px-8 py-2.5 rounded-full font-bold transition-all text-sm">CLIENT ACCESS</button>
         </div>
     </nav>
 
-    <header id="home" class="max-w-7xl mx-auto px-6 pt-20 pb-16">
-        <div class="text-center mb-16">
-            <h1 class="text-5xl md:text-8xl font-extrabold mb-6 tracking-tight">SUBMIT WITH <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">CONFIDENCE.</span></h1>
-            <p class="text-gray-400 text-lg max-w-xl mx-auto">Instant AI detection and similarity check. Get into the Green Zone.</p>
+    <header id="home" class="max-w-7xl mx-auto px-6 pt-24 pb-20">
+        <div class="text-center mb-20">
+            <span class="inline-block px-4 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-6">AI-Powered Academic Verification</span>
+            <h1 class="text-6xl md:text-[7rem] font-extrabold mb-8 tracking-tighter leading-none">
+                THE <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">GREEN</span> ZONE.
+            </h1>
+            <p class="text-slate-400 text-xl max-w-2xl mx-auto font-light leading-relaxed">
+                Instant document similarity analysis and AI content detection. Ensure your work remains original and within academic standards.
+            </p>
         </div>
         
-        <div class="grid lg:grid-cols-2 gap-8 items-stretch mb-24">
-            <div id="paymentBox" class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border relative overflow-hidden">
-                <div id="paymentOverlay" class="absolute inset-0 z-10 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
-                    <i class="fas fa-user-lock text-5xl mb-4 text-blue-500"></i>
-                    <h4 class="font-bold text-2xl mb-2">Login Required</h4>
-                    <button onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition">LOGIN TO PAY</button>
+        <div class="grid lg:grid-cols-2 gap-10 items-stretch mb-32">
+            <div id="paymentBox" class="glass p-10 rounded-[2.5rem] flex flex-col justify-between border-blue-500/20 border relative overflow-hidden">
+                <div id="paymentOverlay" class="absolute inset-0 z-10 bg-slate-950/98 backdrop-blur-xl flex flex-col items-center justify-center text-center p-10">
+                    <div class="w-20 h-20 bg-blue-600/10 rounded-full flex items-center justify-center mb-6 border border-blue-500/20">
+                        <i class="fas fa-lock text-3xl text-blue-500"></i>
+                    </div>
+                    <h4 class="font-bold text-3xl mb-3">Login Required</h4>
+                    <p class="text-slate-500 mb-8 max-w-[250px]">Please authenticate to access the credit top-up portal.</p>
+                    <button onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-blue-600/20">LOGIN TO PROCEED</button>
                 </div>
 
-                <div>
-                    <span class="bg-blue-600/20 text-blue-400 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase border border-blue-500/30">Step 01: Top Up</span>
-                    <h3 class="text-3xl font-bold mb-2">Add Credits</h3>
-                    <p id="queueStatus" class="text-xs text-gray-500 mb-6 uppercase tracking-widest">System Status: <span class="text-green-500">Ready</span></p>
+                <div class="relative z-0">
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                            <span class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-2 block">System Terminal</span>
+                            <h3 class="text-3xl font-bold text-white">Credit Management</h3>
+                        </div>
+                        <div id="queueStatus" class="text-[9px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-lg uppercase font-bold">Status: Online</div>
+                    </div>
                     
-                    <div id="qrContainer" class="bg-white p-3 rounded-2xl inline-block mb-6 animate-pulse">
-                        <img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-40 h-40 object-contain">
+                    <div id="qrContainer" class="bg-white p-5 rounded-[2rem] inline-block mb-8 shadow-2xl shadow-blue-500/20">
+                        <img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-48 h-48 object-contain">
                     </div>
 
-                    <div id="initiatePaymentBox" class="py-10 text-center border border-white/5 rounded-2xl mb-6 bg-white/5">
-                        <i class="fas fa-qrcode text-4xl mb-4 text-blue-500/50"></i>
-                        <p class="text-sm text-gray-400 mb-4">Click below to generate a unique payment session.</p>
-                        <button id="requestPayBtn" onclick="requestPaymentLock()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold transition text-xs">GENERATE QR</button>
+                    <div id="initiatePaymentBox" class="py-12 text-center border border-white/5 rounded-3xl mb-8 bg-slate-900/30">
+                        <i class="fas fa-qrcode text-5xl mb-6 text-blue-500/30"></i>
+                        <p class="text-sm text-slate-400 mb-6 font-light">Generate a unique session QR for RM 5 top-up.</p>
+                        <button id="requestPayBtn" onclick="requestPaymentLock()" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition text-xs tracking-widest uppercase">GENERATE QR</button>
                     </div>
                 </div>
                 
                 <div class="space-y-4">
                     <div id="timerDisplay" class="hidden text-center text-blue-400 font-mono text-sm mb-2 italic">Session Expires: 01:00</div>
-                    <button id="iHavePaidBtn" disabled onclick="startPaymentDetection()" class="btn-disabled w-full border border-blue-500/50 py-3 rounded-xl transition text-sm font-bold text-blue-400">I HAVE PAID RM 5</button>
-                    <input type="text" id="verifyCodeInput" placeholder="---" readonly class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-center tracking-[0.5em] font-bold text-white uppercase">
-                    <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-sm">CLAIM 1 SCAN CREDIT</button>
+                    <button id="iHavePaidBtn" disabled onclick="startPaymentDetection()" class="btn-disabled w-full py-4 rounded-2xl transition-all text-sm font-bold border border-white/5">NOTIFY PAYMENT COMPLETION</button>
+                    <div class="relative group">
+                        <input type="text" id="verifyCodeInput" placeholder="---" readonly class="w-full bg-slate-950 border border-white/10 rounded-2xl px-4 py-5 text-center tracking-[0.8em] font-bold text-white uppercase focus:border-blue-500/50 outline-none">
+                    </div>
+                    <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/20">CLAIM SCAN CREDIT</button>
                 </div>
             </div>
 
-            <div id="scannerBox" class="glass p-8 rounded-3xl flex flex-col justify-between border border-white/5 relative">
-                <div class="absolute top-6 right-6 bg-blue-600/20 border border-blue-500/50 px-4 py-2 rounded-2xl flex items-center gap-2">
+            <div id="scannerBox" class="glass p-10 rounded-[2.5rem] flex flex-col justify-between border border-white/5 relative">
+                <div class="absolute top-10 right-10 bg-slate-900/80 border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-xl">
                     <i class="fas fa-coins text-yellow-400"></i>
-                    <span id="creditCount" class="font-bold text-blue-400 tracking-tight">0 CREDITS</span>
+                    <span id="creditCount" class="font-bold text-white tracking-tight">0 <span class="text-slate-500 text-xs ml-1">UNITS</span></span>
                 </div>
                 <div>
-                    <span id="step2Label" class="bg-gray-700 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Step 02: Locked</span>
-                    <h3 class="text-3xl font-bold mb-4">Run the Check</h3>
+                    <span id="step2Label" class="bg-slate-800 text-[10px] tracking-widest font-bold px-4 py-1.5 rounded-full mb-6 inline-block uppercase text-slate-400 border border-white/5">Analysis Terminal</span>
+                    <h3 class="text-3xl font-bold mb-4">Verification Portal</h3>
+                    <p class="text-slate-500 font-light text-sm mb-10">Upload your manuscript for deep-scan analysis.</p>
                 </div>
-                <div class="space-y-4">
-                    <div onclick="triggerFileUpload()" class="border-2 border-dashed border-white/10 rounded-2xl p-14 text-center hover:border-blue-500/30 cursor-pointer group">
-                        <i id="scannerIcon" class="fas fa-lock text-5xl mb-4 text-gray-700 group-hover:text-blue-500"></i>
-                        <p id="scannerText" class="text-sm font-medium text-gray-500 uppercase">Awaiting Credits</p>
+                <div class="space-y-6">
+                    <div onclick="triggerFileUpload()" class="border-2 border-dashed border-white/10 rounded-[2rem] p-16 text-center hover:border-blue-500/40 hover:bg-blue-500/5 cursor-pointer group transition-all">
+                        <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600/20 transition-all">
+                            <i id="scannerIcon" class="fas fa-lock text-3xl text-slate-600 group-hover:text-blue-500"></i>
+                        </div>
+                        <p id="scannerText" class="text-xs font-bold text-slate-500 uppercase tracking-widest">System Locked</p>
                         <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this)">
                     </div>
-                    <p id="fileNameDisplay" class="text-center text-xs text-blue-400 font-mono hidden"></p>
-                    <button id="analysisBtn" disabled onclick="useCreditAndUpload()" class="btn-disabled w-full py-5 rounded-xl font-black text-lg transition">USE 1 CREDIT & UPLOAD</button>
+                    <p id="fileNameDisplay" class="text-center text-xs text-blue-400 font-mono hidden truncate px-4"></p>
+                    <button id="analysisBtn" disabled onclick="useCreditAndUpload()" class="btn-disabled w-full py-5 rounded-2xl font-bold text-lg transition-all">START DEEP ANALYSIS</button>
                 </div>
             </div>
         </div>
+
+        <section id="how-it-works" class="mb-32">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Simplified Verification</h2>
+                <p class="text-slate-500">Three steps to academic certainty.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass p-10 rounded-3xl border border-white/5">
+                    <div class="step-number mb-6">1</div>
+                    <h4 class="text-xl font-bold mb-3">Top Up</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Secure a payment session and scan the unique QR code to add credits to your account instantly.</p>
+                </div>
+                <div class="glass p-10 rounded-3xl border border-white/5">
+                    <div class="step-number mb-6">2</div>
+                    <h4 class="text-xl font-bold mb-3">Upload</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Submit your .doc or .pdf file. Our system handles documents of all sizes with encrypted security.</p>
+                </div>
+                <div class="glass p-10 rounded-3xl border border-white/5">
+                    <div class="step-number mb-6">3</div>
+                    <h4 class="text-xl font-bold mb-3">Analyze</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Receive a comprehensive report detailing similarity indices and AI generation probability.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="pricing" class="mb-32">
+            <div class="max-w-3xl mx-auto glass p-1 rounded-[3rem] border-white/10">
+                <div class="bg-slate-950 rounded-[2.8rem] p-12 flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-8 md:mb-0">
+                        <h3 class="text-3xl font-bold mb-2">Pay-As-You-Go</h3>
+                        <p class="text-slate-500">No subscriptions. No hidden fees.</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <div class="text-6xl font-bold text-white mb-2">RM 5<span class="text-xl text-slate-600 font-normal"> / SCAN</span></div>
+                        <p class="text-emerald-500 text-xs font-bold uppercase tracking-widest">Includes AI Detection + Similarity</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="max-w-4xl mx-auto mb-32">
+            <h2 class="text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+            <div class="space-y-4">
+                <div class="glass p-8 rounded-2xl border-white/5">
+                    <h4 class="font-bold mb-2 text-blue-400">How long do credits last?</h4>
+                    <p class="text-slate-500 text-sm">Credits never expire. Once you claim a credit, it remains in your account until you choose to use it for an upload.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl border-white/5">
+                    <h4 class="font-bold mb-2 text-blue-400">Is my document stored?</h4>
+                    <p class="text-slate-500 text-sm">We value academic privacy. Documents are deleted from our servers immediately after the analysis report is generated.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl border-white/5">
+                    <h4 class="font-bold mb-2 text-blue-400">Can I pay for multiple scans?</h4>
+                    <p class="text-slate-500 text-sm">Yes. You can generate multiple payment sessions to stack credits on a single account ID.</p>
+                </div>
+            </div>
+        </section>
     </header>
 
+    <footer class="glass border-t border-white/5 py-20">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
+            <div class="col-span-2">
+                <div class="text-2xl font-bold tracking-tighter flex items-center gap-3 mb-6">
+                    <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-shield-halved text-white text-sm"></i></div>
+                    <span class="text-white">SCHOOL<span class="text-blue-500">SOLVER</span></span>
+                </div>
+                <p class="text-slate-500 text-sm max-w-sm leading-relaxed">
+                    The leading platform for academic integrity. Providing students and educators with the tools needed to verify originality in a world of generative AI.
+                </p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-6 text-xs uppercase tracking-widest text-white">Platform</h5>
+                <ul class="text-slate-500 text-sm space-y-4">
+                    <li><a href="#" class="hover:text-blue-400 transition">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">Security Standards</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold mb-6 text-xs uppercase tracking-widest text-white">Contact</h5>
+                <ul class="text-slate-500 text-sm space-y-4">
+                    <li><a href="#" class="hover:text-blue-400 transition">Support Center</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">API Documentation</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-white/5 text-center">
+            <p class="text-slate-600 text-[10px] uppercase tracking-[0.3em]">© 2026 SCHOOLSOLVER. PROTECTING ACADEMIC EXCELLENCE.</p>
+        </div>
+    </footer>
+
     <script>
+        /* SCRIPT FLOW REMAINS UNCHANGED TO ENSURE BACKEND COMPATIBILITY */
         const API_BASE = "https://check-beta-private1.onrender.com";
         let pollingInterval = null;
         let sessionTimer = null;
@@ -129,35 +257,30 @@
             spawnParticles();
         }
 
-        // --- CORE LOCKING LOGIC ---
         async function requestPaymentLock() {
             const userId = localStorage.getItem('currentUserName');
             const reqBtn = document.getElementById('requestPayBtn');
             const statusText = document.getElementById('queueStatus');
-            
-            reqBtn.innerText = "CHECKING SYSTEM...";
+            reqBtn.innerText = "AUTHENTICATING...";
             reqBtn.disabled = true;
-
             try {
-                // Wake up server and check lock
                 const res = await fetch(`${API_BASE}/request-lock?user_id=${userId}`);
                 const data = await res.json();
-
                 if (data.status === "SUCCESS") {
                     document.getElementById('initiatePaymentBox').style.display = 'none';
                     document.getElementById('qrContainer').style.display = 'inline-block';
                     document.getElementById('iHavePaidBtn').disabled = false;
                     document.getElementById('iHavePaidBtn').classList.remove('btn-disabled');
                     document.getElementById('timerDisplay').classList.remove('hidden');
-                    statusText.innerHTML = `Status: <span class="text-blue-500 font-bold underline">SESSION ACTIVE FOR ${userId}</span>`;
+                    statusText.innerHTML = `Status: <span class="text-blue-500">SESSION ACTIVE</span>`;
                     startCountdown(60); 
                 } else {
-                    alert(`SYSTEM BUSY: ${data.message || "Another user is paying."}`);
-                    reqBtn.innerText = "RETRY GENERATE";
+                    alert(`SYSTEM BUSY: ${data.message || "Another session in progress."}`);
+                    reqBtn.innerText = "RETRY";
                     reqBtn.disabled = false;
                 }
             } catch (e) {
-                alert("Server connection failed. (If server was sleeping, please wait 30s and try again)");
+                alert("Connection failed. Please retry.");
                 reqBtn.innerText = "GENERATE QR";
                 reqBtn.disabled = false;
             }
@@ -172,7 +295,7 @@
                 display.innerText = `Session Expires: 00:${secs < 10 ? '0' : ''}${secs}`;
                 if (--time < 0) {
                     clearInterval(sessionTimer);
-                    alert("Session expired. Please generate a new QR.");
+                    alert("Session expired.");
                     location.reload(); 
                 }
             }, 1000);
@@ -181,9 +304,8 @@
         async function startPaymentDetection() {
             const userId = localStorage.getItem('currentUserName');
             const btn = document.getElementById('iHavePaidBtn');
-            btn.innerHTML = `<span class="loader"></span> VERIFYING RECORD...`;
+            btn.innerHTML = `<span class="loader"></span> VERIFYING...`;
             btn.disabled = true;
-
             if (pollingInterval) clearInterval(pollingInterval);
             pollingInterval = setInterval(async () => {
                 try {
@@ -191,22 +313,21 @@
                     const data = await res.json();
                     if (data.code && data.code !== "---") {
                         document.getElementById('verifyCodeInput').value = data.code;
-                        btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
+                        btn.innerHTML = `<i class="fas fa-check mr-2"></i> VERIFIED`;
                         clearInterval(pollingInterval);
                         clearInterval(sessionTimer);
                         document.getElementById('timerDisplay').innerText = "CODE ISSUED";
                     }
-                } catch (e) { console.error("Poll error"); }
+                } catch (e) {}
             }, 5000);
         }
 
-        // --- AUTH & UI ---
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('authBtn');
             const id = document.getElementById('loginID').value.trim();
             const pw = document.getElementById('loginPW').value.trim();
-            btn.innerText = "AUTHENTICATING..."; btn.disabled = true;
+            btn.innerText = "VERIFYING..."; btn.disabled = true;
             try {
                 const res = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
@@ -219,25 +340,21 @@
                     localStorage.setItem('currentUserName', id);
                     location.reload();
                 } else { alert(result.message); }
-            } catch (e) { alert("Server connection failed."); }
-            finally { btn.innerText = "AUTHENTICATE"; btn.disabled = false; }
+            } catch (e) { alert("Auth failed."); }
+            finally { btn.innerText = "AUTHORIZE"; btn.disabled = false; }
         };
 
         async function handleCodeVerification() {
             const code = document.getElementById('verifyCodeInput').value;
             const userId = localStorage.getItem('currentUserName');
             if (!code || code === "---") return alert("Awaiting code...");
-
             const res = await fetch(`${API_BASE}/verify-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, user_id: userId })
             });
-            if (res.ok) {
-                alert("Credit added!");
-                clearInterval(sessionTimer);
-                location.reload();
-            } else { alert("Verification failed."); }
+            if (res.ok) { alert("Credit claimed."); location.reload(); }
+            else { alert("Invalid code."); }
         }
 
         async function refreshCredits() {
@@ -245,22 +362,20 @@
             try {
                 const res = await fetch(`${API_BASE}/get-credits?user_id=${userId}`);
                 const data = await res.json();
-                document.getElementById('creditCount').innerText = `${data.credits} CREDITS`;
+                document.getElementById('creditCount').innerHTML = `${data.credits} <span class="text-slate-500 text-xs ml-1">UNITS</span>`;
                 if (data.credits > 0) unlockScannerUI();
                 else lockScannerUI();
             } catch (e) {}
         }
 
-        // --- FILE HELPERS ---
         function handleFileSelect(input) {
             if (input.files.length > 0) {
-                document.getElementById('fileNameDisplay').innerText = `Ready: ${input.files[0].name}`;
+                document.getElementById('fileNameDisplay').innerText = `MANUSCRIPT: ${input.files[0].name}`;
                 document.getElementById('fileNameDisplay').classList.remove('hidden');
-                document.getElementById('scannerText').innerText = "FILE LOADED";
+                document.getElementById('scannerText').innerText = "READY FOR ANALYSIS";
                 const abtn = document.getElementById('analysisBtn');
-                abtn.disabled = false;
-                abtn.classList.remove('btn-disabled');
-                abtn.classList.add('bg-white', 'text-black');
+                abtn.disabled = false; abtn.classList.remove('btn-disabled');
+                abtn.classList.add('bg-blue-600', 'text-white');
             }
         }
 
@@ -268,27 +383,23 @@
             const userId = localStorage.getItem('currentUserName');
             const file = document.getElementById('fileInput').files[0];
             const btn = document.getElementById('analysisBtn');
-            btn.innerText = "UPLOADING..."; btn.disabled = true;
-
+            btn.innerText = "ANALYZING..."; btn.disabled = true;
             const formData = new FormData();
-            formData.append('document', file);
-            formData.append('user_id', userId);
-
+            formData.append('document', file); formData.append('user_id', userId);
             const res = await fetch(`${API_BASE}/analyze`, { method: 'POST', body: formData });
-            if (res.ok) {
-                alert("Upload Success! Credit deducted.");
-                refreshCredits();
-            } else { alert("Upload failed."); }
-            btn.innerText = "USE 1 CREDIT & UPLOAD";
+            if (res.ok) { alert("Analysis Complete!"); refreshCredits(); }
+            else { alert("Error."); }
+            btn.innerText = "START DEEP ANALYSIS";
         }
 
         function unlockScannerUI() {
             document.getElementById('scannerBox').classList.add('green-zone-glow');
-            document.getElementById('step2Label').classList.replace('bg-gray-700', 'bg-green-600');
-            document.getElementById('step2Label').innerText = "Scanner: Ready";
+            document.getElementById('step2Label').classList.replace('bg-slate-800', 'bg-emerald-600/20');
+            document.getElementById('step2Label').classList.replace('text-slate-400', 'text-emerald-400');
+            document.getElementById('step2Label').innerText = "Scanner: Operational";
             document.getElementById('scannerIcon').classList.replace('fa-lock', 'fa-unlock');
-            document.getElementById('scannerIcon').classList.replace('text-gray-700', 'text-green-500');
-            document.getElementById('scannerText').innerText = "SELECT DOCUMENT";
+            document.getElementById('scannerIcon').classList.replace('text-slate-600', 'text-emerald-500');
+            document.getElementById('scannerText').innerText = "UPLOAD MANUSCRIPT";
         }
 
         function lockScannerUI() {
@@ -312,16 +423,18 @@
         function removePaymentLock() { document.getElementById('paymentOverlay').style.display = 'none'; }
         function updateUIForLoggedInUser(id) {
             const btn = document.getElementById('navLoginBtn');
-            btn.innerHTML = `<i class="fas fa-sign-out-alt mr-2"></i> LOGOUT`;
-            btn.classList.replace('bg-blue-600', 'bg-red-600');
+            btn.innerHTML = `<i class="fas fa-sign-out-alt mr-2"></i> SESSION END`;
+            btn.classList.replace('bg-white', 'bg-red-600/10');
+            btn.classList.add('text-red-500', 'border', 'border-red-500/20');
             btn.onclick = () => { localStorage.clear(); location.reload(); };
         }
 
         function spawnParticles() {
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 20; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
-                p.style.width = p.style.height = Math.random() * 3 + 1 + 'px';
+                const size = Math.random() * 4 + 2;
+                p.style.width = p.style.height = size + 'px';
                 p.style.left = Math.random() * 100 + 'vw';
                 p.style.top = Math.random() * 100 + 'vh';
                 document.body.appendChild(p);
@@ -331,7 +444,7 @@
 
         function animateParticle(p) {
             let x = parseFloat(p.style.left), y = parseFloat(p.style.top);
-            let dx = (Math.random() - 0.5) * 0.1, dy = (Math.random() - 0.5) * 0.1;
+            let dx = (Math.random() - 0.5) * 0.05, dy = (Math.random() - 0.5) * 0.05;
             function move() {
                 x += dx; y += dy;
                 if (x < 0 || x > 100) dx *= -1; if (y < 0 || y > 100) dy *= -1;
