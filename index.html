@@ -20,7 +20,7 @@
         .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3b82f6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .particle { position: fixed; background: rgba(59, 130, 246, 0.3); border-radius: 50%; pointer-events: none; z-index: -1; }
-        #qrContainer { display: none; } /* Hidden by default */
+        #qrContainer { display: none; } 
     </style>
 </head>
 <body class="cyber-grid">
@@ -57,7 +57,7 @@
 
     <header id="home" class="max-w-7xl mx-auto px-6 pt-20 pb-16">
         <div class="text-center mb-16">
-            <h1 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight">SUBMIT WITH <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">CONFIDENCE.</span></h1>
+            <h1 class="text-5xl md:text-8xl font-extrabold mb-6 tracking-tight">SUBMIT WITH <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">CONFIDENCE.</span></h1>
             <p class="text-gray-400 text-lg max-w-xl mx-auto">Instant AI detection and similarity check. Get into the Green Zone.</p>
         </div>
         
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <div id="scannerBox" class="glass p-8 rounded-3xl flex flex-col justify-between transition-all duration-500 border border-white/5 relative">
+            <div id="scannerBox" class="glass p-8 rounded-3xl flex flex-col justify-between border border-white/5 relative">
                 <div class="absolute top-6 right-6 bg-blue-600/20 border border-blue-500/50 px-4 py-2 rounded-2xl flex items-center gap-2">
                     <i class="fas fa-coins text-yellow-400"></i>
                     <span id="creditCount" class="font-bold text-blue-400 tracking-tight">0 CREDITS</span>
@@ -129,7 +129,7 @@
             spawnParticles();
         }
 
-        // MUTEX / QUEUE LOGIC
+        // --- CORE LOCKING LOGIC ---
         async function requestPaymentLock() {
             const userId = localStorage.getItem('currentUserName');
             const reqBtn = document.getElementById('requestPayBtn');
@@ -139,95 +139,68 @@
             reqBtn.disabled = true;
 
             try {
+                // Wake up server and check lock
                 const res = await fetch(`${API_BASE}/request-lock?user_id=${userId}`);
                 const data = await res.json();
 
                 if (data.status === "SUCCESS") {
-                    // Lock granted
                     document.getElementById('initiatePaymentBox').style.display = 'none';
                     document.getElementById('qrContainer').style.display = 'inline-block';
                     document.getElementById('iHavePaidBtn').disabled = false;
                     document.getElementById('iHavePaidBtn').classList.remove('btn-disabled');
                     document.getElementById('timerDisplay').classList.remove('hidden');
-                    statusText.innerHTML = `System Status: <span class="text-blue-500 font-bold underline">SESSION ACTIVE FOR ${userId}</span>`;
-                    startCountdown(60); // 1 minute lock
+                    statusText.innerHTML = `Status: <span class="text-blue-500 font-bold underline">SESSION ACTIVE FOR ${userId}</span>`;
+                    startCountdown(60); 
                 } else {
-                    // Busy
-                    alert(`SYSTEM BUSY: ${data.message}`);
-                    statusText.innerHTML = `System Status: <span class="text-red-500 font-bold">IN USE BY ANOTHER USER</span>`;
-                    reqBtn.innerText = "RETRY IN 60s";
+                    alert(`SYSTEM BUSY: ${data.message || "Another user is paying."}`);
+                    reqBtn.innerText = "RETRY GENERATE";
+                    reqBtn.disabled = false;
                 }
             } catch (e) {
-                alert("Connection to secure vault failed.");
+                alert("Server connection failed. (If server was sleeping, please wait 30s and try again)");
                 reqBtn.innerText = "GENERATE QR";
                 reqBtn.disabled = false;
             }
         }
 
         function startCountdown(seconds) {
+            if (sessionTimer) clearInterval(sessionTimer);
             let time = seconds;
             const display = document.getElementById('timerDisplay');
             sessionTimer = setInterval(() => {
-                let mins = Math.floor(time / 60);
                 let secs = time % 60;
-                display.innerText = `Session Expires: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                display.innerText = `Session Expires: 00:${secs < 10 ? '0' : ''}${secs}`;
                 if (--time < 0) {
                     clearInterval(sessionTimer);
-                    location.reload(); // Lock expired, reset UI
+                    alert("Session expired. Please generate a new QR.");
+                    location.reload(); 
                 }
             }, 1000);
         }
 
-        // Rest of your functions (toggleLogin, refreshCredits, etc.) remain largely the same.
-        // But make sure startPaymentDetection matches your new mutex logic on backend.
-
         async function startPaymentDetection() {
             const userId = localStorage.getItem('currentUserName');
             const btn = document.getElementById('iHavePaidBtn');
-            btn.innerHTML = `<span class="loader"></span> VERIFYING BANK RECORD...`;
+            btn.innerHTML = `<span class="loader"></span> VERIFYING RECORD...`;
             btn.disabled = true;
 
-            // Notice we don't need notify-intent anymore because the Lock already told us who is paying!
             if (pollingInterval) clearInterval(pollingInterval);
             pollingInterval = setInterval(async () => {
-                const res = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
-                const data = await res.json();
-                if (data.code && data.code !== "---") {
-                    document.getElementById('verifyCodeInput').value = data.code;
-                    btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
-                    clearInterval(pollingInterval);
-                    clearInterval(sessionTimer); // Stop timer on success
-                    document.getElementById('timerDisplay').innerText = "CREDIT ISSUED";
-                }
+                try {
+                    const res = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
+                    const data = await res.json();
+                    if (data.code && data.code !== "---") {
+                        document.getElementById('verifyCodeInput').value = data.code;
+                        btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
+                        clearInterval(pollingInterval);
+                        clearInterval(sessionTimer);
+                        document.getElementById('timerDisplay').innerText = "CODE ISSUED";
+                    }
+                } catch (e) { console.error("Poll error"); }
             }, 5000);
         }
 
-        function toggleLogin() {
-            const modal = document.getElementById('loginModal');
-            if (modal.classList.contains('modal-active')) {
-                modal.classList.remove('modal-active');
-                setTimeout(() => { modal.style.display = 'none'; }, 300);
-            } else {
-                modal.style.display = 'flex';
-                setTimeout(() => { modal.classList.add('modal-active'); }, 10);
-            }
-        }
-
-        async function refreshCredits() {
-            const userId = localStorage.getItem('currentUserName');
-            if (!userId) return;
-            try {
-                const res = await fetch(`${API_BASE}/get-credits?user_id=${userId}`);
-                const data = await res.json();
-                document.getElementById('creditCount').innerText = `${data.credits} CREDITS`;
-                if (data.credits > 0) unlockScannerUI();
-                else lockScannerUI();
-            } catch (e) { console.error("Credit sync failed"); }
-        }
-
-        function applyPaymentLock() { document.getElementById('paymentOverlay').style.display = 'flex'; }
-        function removePaymentLock() { document.getElementById('paymentOverlay').style.display = 'none'; }
-
+        // --- AUTH & UI ---
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('authBtn');
@@ -253,7 +226,7 @@
         async function handleCodeVerification() {
             const code = document.getElementById('verifyCodeInput').value;
             const userId = localStorage.getItem('currentUserName');
-            if (!code || code === "---") return alert("Awaiting verification code.");
+            if (!code || code === "---") return alert("Awaiting code...");
 
             const res = await fetch(`${API_BASE}/verify-code`, {
                 method: 'POST',
@@ -261,27 +234,33 @@
                 body: JSON.stringify({ code, user_id: userId })
             });
             if (res.ok) {
-                alert("Credit claimed successfully!");
-                document.getElementById('verifyCodeInput').value = "---";
-                refreshCredits();
-                setTimeout(() => location.reload(), 2000); // Reset for next payment
-            }
+                alert("Credit added!");
+                clearInterval(sessionTimer);
+                location.reload();
+            } else { alert("Verification failed."); }
         }
 
-        function triggerFileUpload() { 
-            if (parseInt(document.getElementById('creditCount').innerText) > 0) {
-                document.getElementById('fileInput').click(); 
-            } else { alert("Please pay to add credits."); }
+        async function refreshCredits() {
+            const userId = localStorage.getItem('currentUserName');
+            try {
+                const res = await fetch(`${API_BASE}/get-credits?user_id=${userId}`);
+                const data = await res.json();
+                document.getElementById('creditCount').innerText = `${data.credits} CREDITS`;
+                if (data.credits > 0) unlockScannerUI();
+                else lockScannerUI();
+            } catch (e) {}
         }
 
+        // --- FILE HELPERS ---
         function handleFileSelect(input) {
             if (input.files.length > 0) {
                 document.getElementById('fileNameDisplay').innerText = `Ready: ${input.files[0].name}`;
                 document.getElementById('fileNameDisplay').classList.remove('hidden');
-                document.getElementById('scannerText').innerText = "READY TO SCAN";
-                document.getElementById('analysisBtn').disabled = false;
-                document.getElementById('analysisBtn').classList.remove('btn-disabled');
-                document.getElementById('analysisBtn').classList.add('bg-white', 'text-black');
+                document.getElementById('scannerText').innerText = "FILE LOADED";
+                const abtn = document.getElementById('analysisBtn');
+                abtn.disabled = false;
+                abtn.classList.remove('btn-disabled');
+                abtn.classList.add('bg-white', 'text-black');
             }
         }
 
@@ -297,12 +276,9 @@
 
             const res = await fetch(`${API_BASE}/analyze`, { method: 'POST', body: formData });
             if (res.ok) {
-                alert("Analysis started! Report will be generated.");
+                alert("Upload Success! Credit deducted.");
                 refreshCredits();
-            } else {
-                const err = await res.json();
-                alert(err.message);
-            }
+            } else { alert("Upload failed."); }
             btn.innerText = "USE 1 CREDIT & UPLOAD";
         }
 
@@ -317,10 +293,23 @@
 
         function lockScannerUI() {
             document.getElementById('scannerBox').classList.remove('green-zone-glow');
-            document.getElementById('analysisBtn').classList.add('btn-disabled');
             document.getElementById('analysisBtn').disabled = true;
         }
 
+        function toggleLogin() {
+            const modal = document.getElementById('loginModal');
+            if (modal.classList.contains('modal-active')) {
+                modal.classList.remove('modal-active');
+                setTimeout(() => { modal.style.display = 'none'; }, 300);
+            } else {
+                modal.style.display = 'flex';
+                setTimeout(() => { modal.classList.add('modal-active'); }, 10);
+            }
+        }
+
+        function triggerFileUpload() { if (parseInt(document.getElementById('creditCount').innerText) > 0) document.getElementById('fileInput').click(); else alert("No credits."); }
+        function applyPaymentLock() { document.getElementById('paymentOverlay').style.display = 'flex'; }
+        function removePaymentLock() { document.getElementById('paymentOverlay').style.display = 'none'; }
         function updateUIForLoggedInUser(id) {
             const btn = document.getElementById('navLoginBtn');
             btn.innerHTML = `<i class="fas fa-sign-out-alt mr-2"></i> LOGOUT`;
