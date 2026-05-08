@@ -41,7 +41,6 @@
             background: linear-gradient(135deg, var(--cyber-blue), #a855f7);
         }
 
-        /* Modal & UI Transitions */
         #loginModal { transition: all 0.3s ease; visibility: hidden; opacity: 0; }
         .modal-active { visibility: visible !important; opacity: 1 !important; }
         .modal-content-scale { transform: scale(0.9); transition: transform 0.3s ease; }
@@ -62,7 +61,6 @@
             opacity: 0.6;
         }
 
-        /* Spinner for the waiting state */
         .loader {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #3b82f6;
@@ -75,7 +73,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
@@ -327,7 +324,7 @@
                     removePaymentLock();
                     toggleLogin();
                 } else {
-                    alert("Invalid Credentials.");
+                    alert(result.message || "Invalid Credentials.");
                 }
             } catch (error) {
                 alert("Server Connection Failed.");
@@ -360,21 +357,19 @@
             btn.disabled = true;
 
             try {
-                // Notify the RAM memory that this user is the active payer
                 await fetch(`${API_BASE}/notify-intent`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId })
                 });
 
-                // Start Polling
                 if (pollingInterval) clearInterval(pollingInterval);
                 
                 pollingInterval = setInterval(async () => {
                     const response = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.code) {
+                        if (data.code && data.code !== "---") {
                             codeInput.value = data.code;
                             codeInput.classList.add('border-green-500', 'text-green-400');
                             btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
@@ -391,26 +386,42 @@
             }
         }
 
-       
-
         async function handleCodeVerification() {
             const codeValue = document.getElementById('verifyCodeInput').value.trim().toUpperCase();
-            const userId = localStorage.getItem('currentUserName'); // Get the logged-in ID
+            const userId = localStorage.getItem('currentUserName');
+            const validateBtn = document.getElementById('validateBtn');
 
-    // ... (keep your length check here) ...
+            if (!codeValue || codeValue === "---") {
+                return alert("Please wait for the payment code to be generated.");
+            }
 
-        try {
-            const response = await fetch(`${API_BASE}/verify-code`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                code: codeValue,
-                user_id: userId // SEND THE ID HERE
-                })
-            });
+            validateBtn.innerText = "VERIFYING...";
+            validateBtn.disabled = true;
 
-            const result = await response.json();
-        // ... (keep the rest of your unlock logic) ...
+            try {
+                const response = await fetch(`${API_BASE}/verify-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        code: codeValue,
+                        user_id: userId 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    localStorage.setItem('isUnlocked', 'true');
+                    unlockScanner();
+                    alert("Verification successful! Scanner unlocked.");
+                } else {
+                    alert(result.message || "Invalid Code. Please try again.");
+                }
+            } catch (e) {
+                alert("Server connection failed during verification.");
+            } finally {
+                validateBtn.innerText = "VALIDATE & UNLOCK SCANNER";
+                validateBtn.disabled = false;
             }
         }
 
@@ -433,7 +444,7 @@
             analysisBtn.classList.add('bg-white', 'text-black', 'hover:bg-green-400');
         }
 
-        // Simple background particles for cyber effect
+        // Particle System
         const particleCount = 15;
         for (let i = 0; i < particleCount; i++) {
             const p = document.createElement('div');
