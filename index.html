@@ -62,6 +62,19 @@
         }
 
         #paymentOverlay { transition: opacity 0.5s ease, visibility 0.5s ease; }
+
+        /* Spinner for the waiting state */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="cyber-grid">
@@ -131,7 +144,7 @@
                 <div>
                     <span class="step-number text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">STEP 01</span>
                     <h3 class="text-3xl font-bold mb-4">Get Credits</h3>
-                    <p class="text-gray-400 mb-6">Scan RM 5 via DuitNow. Your 6-digit <b>Verification Code</b> will be sent to your email automatically.</p>
+                    <p class="text-gray-400 mb-6">Scan RM 5 via DuitNow. Click 'I Have Paid' and your code will appear here once confirmed.</p>
                     
                     <div class="bg-white p-3 rounded-2xl inline-block mb-6 shadow-2xl shadow-blue-500/20">
                         <img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-44 h-44 object-contain">
@@ -139,12 +152,16 @@
                 </div>
                 
                 <div class="space-y-4">
+                    <button id="iHavePaidBtn" onclick="startPaymentDetection()" class="w-full border border-blue-500/50 hover:bg-blue-500/10 py-3 rounded-xl transition text-sm font-bold text-blue-400 mb-2">
+                        I HAVE SCANNED & PAID
+                    </button>
+
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Verification Code</label>
-                        <input type="text" id="verifyCodeInput" placeholder="EX: 123456" 
+                        <input type="text" id="verifyCodeInput" placeholder="WAITING..." readonly
                                class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-center tracking-[0.5em] font-bold focus:border-blue-500 outline-none transition uppercase">
                     </div>
-                    <button onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">
+                    <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl transition font-bold tracking-widest text-sm">
                         VALIDATE & UNLOCK
                     </button>
                 </div>
@@ -171,6 +188,7 @@
 
     <script>
         const API_BASE = "https://check-beta-private1.onrender.com";
+        let pollingInterval = null;
 
         window.onload = function() {
             const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -229,16 +247,15 @@
 
                 if (response.ok) {
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('currentUserName', result.name);
+                    localStorage.setItem('currentUserName', inputID); // Store ID for matching
                     updateUIForLoggedInUser(result.name);
                     removePaymentLock();
                     toggleLogin();
-                    alert("Welcome back, " + result.name);
                 } else {
                     alert(result.message || "Invalid Credentials.");
                 }
             } catch (error) {
-                alert("Server Connection Failed. Please try again later.");
+                alert("Server Connection Failed.");
             } finally {
                 btn.innerText = "AUTHENTICATE";
                 btn.disabled = false;
@@ -257,17 +274,56 @@
             }
         }
 
-        async function handleCodeVerification() {
-            if (localStorage.getItem('isLoggedIn') !== 'true') {
-                alert("Please log in first.");
-                return;
-            }
+        // --- NEW PAYMENT DETECTION LOGIC ---
 
+        async function startPaymentDetection() {
+            const userId = localStorage.getItem('currentUserName');
+            const btn = document.getElementById('iHavePaidBtn');
             const codeInput = document.getElementById('verifyCodeInput');
-            const codeValue = codeInput.value.trim().toUpperCase();
 
-            if (codeValue.length < 6) {
-                alert("Please enter the full 6-digit code.");
+            if (!userId) return alert("Session expired. Please login again.");
+
+            // 1. Notify server that this user is paying
+            btn.innerHTML = `<span class="loader"></span> LISTENING FOR PAYMENT...`;
+            btn.disabled = true;
+
+            try {
+                await fetch(`${API_BASE}/notify-intent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                // 2. Start Polling the server every 5 seconds
+                if (pollingInterval) clearInterval(pollingInterval);
+                
+                pollingInterval = setInterval(async () => {
+                    const response = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.code) {
+                            codeInput.value = data.code;
+                            codeInput.classList.add('border-green-500', 'text-green-400');
+                            btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT CONFIRMED`;
+                            btn.classList.replace('text-blue-400', 'text-green-400');
+                            clearInterval(pollingInterval);
+                            alert("Payment confirmed! Your verification code has arrived.");
+                        }
+                    }
+                }, 5000);
+
+            } catch (e) {
+                alert("Communication error with server.");
+                btn.innerText = "I HAVE SCANNED & PAID";
+                btn.disabled = false;
+            }
+        }
+
+        async function handleCodeVerification() {
+            const codeValue = document.getElementById('verifyCodeInput').value.trim().toUpperCase();
+
+            if (codeValue.length < 6 || codeValue === "WAITING...") {
+                alert("Please wait for the automated code or enter it manually.");
                 return;
             }
 
@@ -288,7 +344,7 @@
                     alert(result.message || "Invalid or used code.");
                 }
             } catch (error) {
-                alert("Connection error. Check your Render server logs.");
+                alert("Connection error.");
             }
         }
 
