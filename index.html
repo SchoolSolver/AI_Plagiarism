@@ -391,33 +391,28 @@
             }
         }
 
+       
+
         async function handleCodeVerification() {
             const codeValue = document.getElementById('verifyCodeInput').value.trim().toUpperCase();
+            const userId = localStorage.getItem('currentUserName'); // Get the logged-in ID
 
-            if (codeValue.length < 3 || codeValue === "---") {
-                alert("Please wait for your code to appear after payment.");
-                return;
+    // ... (keep your length check here) ...
+
+        try {
+            const response = await fetch(`${API_BASE}/verify-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                code: codeValue,
+                user_id: userId // SEND THE ID HERE
+                })
+            });
+
+            const result = await response.json();
+        // ... (keep the rest of your unlock logic) ...
             }
-
-            try {
-                const response = await fetch(`${API_BASE}/verify-code`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: codeValue })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    localStorage.setItem('isUnlocked', 'true');
-                    unlockScanner();
-                } else {
-                    alert("Invalid or already used code.");
-                }
-            } catch (error) {
-                alert("Verification failed.");
-            }
-        }
+    }
 
         function unlockScanner() {
             const scannerBox = document.getElementById('scannerBox');
