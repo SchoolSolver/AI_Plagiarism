@@ -20,6 +20,7 @@
         .loader { border: 2px solid #f3f3f3; border-top: 2px solid #3b82f6; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .particle { position: fixed; background: rgba(59, 130, 246, 0.3); border-radius: 50%; pointer-events: none; z-index: -1; }
+        #qrContainer { display: none; } /* Hidden by default */
     </style>
 </head>
 <body class="cyber-grid">
@@ -50,7 +51,7 @@
                 <a href="#pricing" class="hover:text-blue-400">Pricing</a>
                 <a href="#faq" class="hover:text-blue-400">FAQ</a>
             </div>
-            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition">DASHBOARD</button>
+            <button id="navLoginBtn" onclick="toggleLogin()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-bold transition text-sm">DASHBOARD</button>
         </div>
     </nav>
 
@@ -61,7 +62,7 @@
         </div>
         
         <div class="grid lg:grid-cols-2 gap-8 items-stretch mb-24">
-            <div class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border relative overflow-hidden">
+            <div id="paymentBox" class="glass p-8 rounded-3xl flex flex-col justify-between border-blue-500/20 border relative overflow-hidden">
                 <div id="paymentOverlay" class="absolute inset-0 z-10 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
                     <i class="fas fa-user-lock text-5xl mb-4 text-blue-500"></i>
                     <h4 class="font-bold text-2xl mb-2">Login Required</h4>
@@ -70,12 +71,23 @@
 
                 <div>
                     <span class="bg-blue-600/20 text-blue-400 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase border border-blue-500/30">Step 01: Top Up</span>
-                    <h3 class="text-3xl font-bold mb-4">Add Credits</h3>
-                    <div class="bg-white p-3 rounded-2xl inline-block mb-6"><img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-40 h-40 object-contain"></div>
+                    <h3 class="text-3xl font-bold mb-2">Add Credits</h3>
+                    <p id="queueStatus" class="text-xs text-gray-500 mb-6 uppercase tracking-widest">System Status: <span class="text-green-500">Ready</span></p>
+                    
+                    <div id="qrContainer" class="bg-white p-3 rounded-2xl inline-block mb-6 animate-pulse">
+                        <img src="https://i.ibb.co/h1w4bL8Y/Screenshot-2026-05-06-115433-removebg-preview.png" alt="QR" class="w-40 h-40 object-contain">
+                    </div>
+
+                    <div id="initiatePaymentBox" class="py-10 text-center border border-white/5 rounded-2xl mb-6 bg-white/5">
+                        <i class="fas fa-qrcode text-4xl mb-4 text-blue-500/50"></i>
+                        <p class="text-sm text-gray-400 mb-4">Click below to generate a unique payment session.</p>
+                        <button id="requestPayBtn" onclick="requestPaymentLock()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold transition text-xs">GENERATE QR</button>
+                    </div>
                 </div>
                 
                 <div class="space-y-4">
-                    <button id="iHavePaidBtn" onclick="startPaymentDetection()" class="w-full border border-blue-500/50 py-3 rounded-xl transition text-sm font-bold text-blue-400">I HAVE PAID RM 5</button>
+                    <div id="timerDisplay" class="hidden text-center text-blue-400 font-mono text-sm mb-2 italic">Session Expires: 05:00</div>
+                    <button id="iHavePaidBtn" disabled onclick="startPaymentDetection()" class="btn-disabled w-full border border-blue-500/50 py-3 rounded-xl transition text-sm font-bold text-blue-400">I HAVE PAID RM 5</button>
                     <input type="text" id="verifyCodeInput" placeholder="---" readonly class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-center tracking-[0.5em] font-bold text-white uppercase">
                     <button id="validateBtn" onclick="handleCodeVerification()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-sm">CLAIM 1 SCAN CREDIT</button>
                 </div>
@@ -86,12 +98,10 @@
                     <i class="fas fa-coins text-yellow-400"></i>
                     <span id="creditCount" class="font-bold text-blue-400 tracking-tight">0 CREDITS</span>
                 </div>
-
                 <div>
                     <span id="step2Label" class="bg-gray-700 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Step 02: Locked</span>
                     <h3 class="text-3xl font-bold mb-4">Run the Check</h3>
                 </div>
-
                 <div class="space-y-4">
                     <div onclick="triggerFileUpload()" class="border-2 border-dashed border-white/10 rounded-2xl p-14 text-center hover:border-blue-500/30 cursor-pointer group">
                         <i id="scannerIcon" class="fas fa-lock text-5xl mb-4 text-gray-700 group-hover:text-blue-500"></i>
@@ -103,35 +113,12 @@
                 </div>
             </div>
         </div>
-
-        <section id="pricing" class="py-20 border-t border-white/5">
-            <h2 class="text-4xl font-bold text-center mb-16">Simple Pricing</h2>
-            <div class="max-w-md mx-auto glass p-8 rounded-3xl text-center border-blue-500/30 border">
-                <span class="text-5xl font-black">RM 5</span><span class="text-gray-500"> / scan</span>
-                <ul class="text-left space-y-4 my-8 text-sm text-gray-300">
-                    <li><i class="fas fa-check text-green-500 mr-2"></i> AI Content Detection</li>
-                    <li><i class="fas fa-check text-green-500 mr-2"></i> Similarity Analysis</li>
-                    <li><i class="fas fa-check text-green-500 mr-2"></i> Private Report</li>
-                </ul>
-            </div>
-        </section>
-
-        <section id="faq" class="py-20 border-t border-white/5">
-            <h2 class="text-4xl font-bold text-center mb-16">FAQ</h2>
-            <div class="max-w-2xl mx-auto space-y-4">
-                <div class="glass p-6 rounded-2xl"><h4 class="font-bold mb-2">How long is verification?</h4><p class="text-gray-400 text-sm">Usually 10-60 seconds after payment.</p></div>
-                <div class="glass p-6 rounded-2xl"><h4 class="font-bold mb-2">Are my files safe?</h4><p class="text-gray-400 text-sm">Yes, files are deleted immediately after the report is generated.</p></div>
-            </div>
-        </section>
     </header>
-
-    <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-xs uppercase tracking-widest">
-        &copy; 2026 SCHOOLSOLVER. PROTECTED BY AES-256 ENCRYPTION.
-    </footer>
 
     <script>
         const API_BASE = "https://check-beta-private1.onrender.com";
         let pollingInterval = null;
+        let sessionTimer = null;
 
         window.onload = function() {
             if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -140,6 +127,79 @@
                 refreshCredits();
             } else { applyPaymentLock(); }
             spawnParticles();
+        }
+
+        // MUTEX / QUEUE LOGIC
+        async function requestPaymentLock() {
+            const userId = localStorage.getItem('currentUserName');
+            const reqBtn = document.getElementById('requestPayBtn');
+            const statusText = document.getElementById('queueStatus');
+            
+            reqBtn.innerText = "CHECKING SYSTEM...";
+            reqBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/request-lock?user_id=${userId}`);
+                const data = await res.json();
+
+                if (data.status === "SUCCESS") {
+                    // Lock granted
+                    document.getElementById('initiatePaymentBox').style.display = 'none';
+                    document.getElementById('qrContainer').style.display = 'inline-block';
+                    document.getElementById('iHavePaidBtn').disabled = false;
+                    document.getElementById('iHavePaidBtn').classList.remove('btn-disabled');
+                    document.getElementById('timerDisplay').classList.remove('hidden');
+                    statusText.innerHTML = `System Status: <span class="text-blue-500 font-bold underline">SESSION ACTIVE FOR ${userId}</span>`;
+                    startCountdown(300); // 5 minute lock
+                } else {
+                    // Busy
+                    alert(`SYSTEM BUSY: ${data.message}`);
+                    statusText.innerHTML = `System Status: <span class="text-red-500 font-bold">IN USE BY ANOTHER USER</span>`;
+                    reqBtn.innerText = "RETRY IN 60s";
+                }
+            } catch (e) {
+                alert("Connection to secure vault failed.");
+                reqBtn.innerText = "GENERATE QR";
+                reqBtn.disabled = false;
+            }
+        }
+
+        function startCountdown(seconds) {
+            let time = seconds;
+            const display = document.getElementById('timerDisplay');
+            sessionTimer = setInterval(() => {
+                let mins = Math.floor(time / 60);
+                let secs = time % 60;
+                display.innerText = `Session Expires: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                if (--time < 0) {
+                    clearInterval(sessionTimer);
+                    location.reload(); // Lock expired, reset UI
+                }
+            }, 1000);
+        }
+
+        // Rest of your functions (toggleLogin, refreshCredits, etc.) remain largely the same.
+        // But make sure startPaymentDetection matches your new mutex logic on backend.
+
+        async function startPaymentDetection() {
+            const userId = localStorage.getItem('currentUserName');
+            const btn = document.getElementById('iHavePaidBtn');
+            btn.innerHTML = `<span class="loader"></span> VERIFYING BANK RECORD...`;
+            btn.disabled = true;
+
+            // Notice we don't need notify-intent anymore because the Lock already told us who is paying!
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(async () => {
+                const res = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
+                const data = await res.json();
+                if (data.code && data.code !== "---") {
+                    document.getElementById('verifyCodeInput').value = data.code;
+                    btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
+                    clearInterval(pollingInterval);
+                    clearInterval(sessionTimer); // Stop timer on success
+                    document.getElementById('timerDisplay').innerText = "CREDIT ISSUED";
+                }
+            }, 5000);
         }
 
         function toggleLogin() {
@@ -190,30 +250,6 @@
             finally { btn.innerText = "AUTHENTICATE"; btn.disabled = false; }
         };
 
-        async function startPaymentDetection() {
-            const userId = localStorage.getItem('currentUserName');
-            const btn = document.getElementById('iHavePaidBtn');
-            btn.innerHTML = `<span class="loader"></span> AWAITING CONFIRMATION...`;
-            btn.disabled = true;
-
-            await fetch(`${API_BASE}/notify-intent`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId })
-            });
-
-            if (pollingInterval) clearInterval(pollingInterval);
-            pollingInterval = setInterval(async () => {
-                const res = await fetch(`${API_BASE}/get-my-code?user_id=${userId}`);
-                const data = await res.json();
-                if (data.code && data.code !== "---") {
-                    document.getElementById('verifyCodeInput').value = data.code;
-                    btn.innerHTML = `<i class="fas fa-check mr-2"></i> PAYMENT VERIFIED`;
-                    clearInterval(pollingInterval);
-                }
-            }, 5000);
-        }
-
         async function handleCodeVerification() {
             const code = document.getElementById('verifyCodeInput').value;
             const userId = localStorage.getItem('currentUserName');
@@ -228,6 +264,7 @@
                 alert("Credit claimed successfully!");
                 document.getElementById('verifyCodeInput').value = "---";
                 refreshCredits();
+                setTimeout(() => location.reload(), 2000); // Reset for next payment
             }
         }
 
