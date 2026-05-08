@@ -458,6 +458,27 @@
             analysisBtn.classList.add('bg-white', 'text-black', 'hover:bg-green-400');
         }
 
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const userId = localStorage.getItem('currentUserName');
+
+            const formData = new FormData();
+            formData.append('document', fileInput.files[0]);
+            formData.append('user_id', userId); // Send the ID for the credit check
+
+            const response = await fetch(`${API_BASE}/analyze`, {
+                method: 'POST',
+                body: formData // No headers needed for FormData
+            });
+
+            const result = await response.json();
+                if (response.status === 403) {
+                alert("Nice try! You need to pay for credits first.");
+                } else {
+        // Show report...
+            }
+        }
+
         // Background particles
         const particleCount = 15;
         for (let i = 0; i < particleCount; i++) {
